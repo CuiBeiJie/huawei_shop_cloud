@@ -1,6 +1,7 @@
 package com.huawei.item.service;
 
 import com.huawei.item.pojo.SpecGroup;
+import com.huawei.item.pojo.SpecParam;
 
 import java.util.List;
 
@@ -17,4 +18,14 @@ public interface SpecificationService {
     void saveSpecGropu(SpecGroup specGroup);
     //删除商品规格组
     void deleteSpecGroupByID(Long id);
+    //更新商品规格组
+    void updateSpecGroup(SpecGroup specGroup);
+    //根据商品规格组id查询规格参数
+    List<SpecParam> querySpecParams(Long gid);
+    //新增商品规格参数
+    void saveSpecParm(SpecParam specParam);
+    //更新商品规格参数
+    void updateSpecParam(SpecParam specParam);
+    //删除商品规格参数
+    void deleteSpecParam(Long id);
 }

@@ -3,7 +3,9 @@ package com.huawei.item.service.impl;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.item.mapper.SpecGroupMapper;
+import com.huawei.item.mapper.SpecParmMapper;
 import com.huawei.item.pojo.SpecGroup;
+import com.huawei.item.pojo.SpecParam;
 import com.huawei.item.service.SpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,10 @@ import java.util.List;
 public class SpecificationServiceImpl implements SpecificationService {
 
     @Autowired
-    private SpecGroupMapper specGroupMapper;
+    private SpecGroupMapper specGroupMapper;//商品规格组mapper
+
+    @Autowired
+    private SpecParmMapper specParmMapper;//商品规格参数mapper
 
     //商品分类查询出商品规格组
     public List<SpecGroup> querySepcGroupBycid(Long cid) {
@@ -51,6 +56,56 @@ public class SpecificationServiceImpl implements SpecificationService {
         int count = specGroupMapper.deleteByPrimaryKey(id);
         if(count!=1){
             throw new SelfException(ExceptionEnums.SPECGROUP_DELETE_ERROR);
+        }
+    }
+
+    //更新商品规格组
+    public void updateSpecGroup(SpecGroup specGroup) {
+        int count = specGroupMapper.updateByPrimaryKeySelective(specGroup);
+        if(count != 1){
+            throw new SelfException(ExceptionEnums.SPECGROUP_UPDATE_ERROR);
+        }
+    }
+
+    //根据商品规格组id来查询规格参数
+    public List<SpecParam> querySpecParams(Long gid) {
+        //组装查询条件
+        SpecParam specParam = new SpecParam();
+        specParam.setGroupId(gid);
+        List<SpecParam> specParamsList = specParmMapper.select(specParam);
+        if(CollectionUtils.isEmpty(specParamsList)){
+            throw new SelfException(ExceptionEnums.SPECPARM);
+        }
+        return specParamsList;
+    }
+
+    //新增商品规格参数
+    public void saveSpecParm(SpecParam specParam) {
+        int conut = specParmMapper.insert(specParam);
+        if(conut != 1){
+            throw new SelfException(ExceptionEnums.SPECPARM_SAVE_ERROR);
+        }
+    }
+
+    //更新商品规格参数
+    public void updateSpecParam(SpecParam specParam) {
+          Integer count;
+         //需要校验一下同一个规则参数组内的规格参数名称有没有重复
+         count = specParmMapper.validateSpecParam(specParam.getId(),specParam.getCid(),specParam.getGroupId(),specParam.getName());
+         if(count != null && count>=1){
+             throw  new SelfException(ExceptionEnums.EXISTS_SPECPARM_NAME);
+         }
+         count = specParmMapper.updateByPrimaryKeySelective(specParam);
+         if(count != 1){
+             throw  new SelfException(ExceptionEnums.SPECPARM_UPDATE_ERROR);
+         }
+    }
+
+    //删除商品规格参数
+    public void deleteSpecParam(Long id) {
+        int count = specParmMapper.deleteByPrimaryKey(id);
+        if(count != 1){
+            throw new SelfException(ExceptionEnums.SPEPARAM_DELETE_ERROR);
         }
     }
 

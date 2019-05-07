@@ -3,6 +3,7 @@ package com.huawei.item.controller;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.item.pojo.SpecGroup;
+import com.huawei.item.pojo.SpecParam;
 import com.huawei.item.service.SpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,30 @@ public class SpecificationController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * 修改商品规格组
+     * @param specGroup
+     * @return
+     */
+    @PutMapping("group")
+    public ResponseEntity<Void> updateSpecification(SpecGroup specGroup){
+        int count = 0;
+        if(null == specGroup){
+            return  new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        //重复性校验
+        //校验一下商品规格组名称重复性校验
+
+        this.specificationService.updateSpecGroup(specGroup);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * 删除商品规格组
+     * @param id
+     * @return
+     */
+
     @DeleteMapping("group/{id}")
     public ResponseEntity<Void> deleteSpecification(@PathVariable("id") Long id){
         if(null == id){
@@ -70,5 +95,58 @@ public class SpecificationController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * 根据规格组id查询规格参数
+     * @param gid
+     * @return
+     */
+    @GetMapping("/params")
+    public ResponseEntity<List<SpecParam>> querySpecParam(@RequestParam(value="gid", required = false) Long gid){
+             if(null == gid){
+                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+             }
+        return ResponseEntity.ok(specificationService.querySpecParams(gid));
+    }
 
+    /**
+     * 新增规格参数
+     * @param specParam
+     * @return
+     */
+    @PostMapping("param")
+    public ResponseEntity<Void> saveSpecParm(SpecParam specParam){
+        if(null == specParam){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        specificationService.saveSpecParm(specParam);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * 更新规格参数
+     * @param specParam
+     * @return
+     */
+    @PutMapping("param")
+    public ResponseEntity<Void> updateSpecParm(SpecParam specParam){
+        if(null == specParam){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        specificationService.updateSpecParam(specParam);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * 删除规格参数
+     * @param id
+     * @return
+     */
+    @DeleteMapping("param/{id}")
+    public ResponseEntity<Void> deleteSpecParm(@PathVariable("id") Long id){
+        if(null == id ){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        specificationService.deleteSpecParam(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
