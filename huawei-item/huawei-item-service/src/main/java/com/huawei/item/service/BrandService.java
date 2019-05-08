@@ -15,4 +15,6 @@ public interface BrandService {
     void updateBrand(Brand brand, List<Long> categories);
     //删除品牌
     void deleteBrand(long parseLong);
+    //根据id查询品牌
+    Brand queryBrandById(Long brandId);
 }

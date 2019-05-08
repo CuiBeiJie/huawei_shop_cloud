@@ -1,10 +1,13 @@
 package com.huawei.item.service.impl;
 
+import com.huawei.common.enums.ExceptionEnums;
+import com.huawei.common.exception.SelfException;
 import com.huawei.item.mapper.CategoryMapper;
 import com.huawei.item.pojo.Category;
 import com.huawei.item.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -41,5 +44,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> queryByBrandId(Long bid) {
         return this.categoryMapper.queryByBrandId(bid);
+    }
+
+    /**
+     * 批量查询分类
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Category> queryByIds(List<Long> ids) {
+        List<Category> categories = this.categoryMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(categories)) {
+            //没有找到返回404
+            throw new SelfException(ExceptionEnums.CATEGORY_NOT_FOUND);
+        }
+        return categories;
     }
 }

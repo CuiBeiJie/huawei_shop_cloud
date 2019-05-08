@@ -18,4 +18,7 @@ public interface CategoryService {
 
     //根据品牌id查询分类信息
     List<Category> queryByBrandId(Long bid);
+
+    //批量查询分类列表
+    List<Category> queryByIds(List<Long> ids);
 }

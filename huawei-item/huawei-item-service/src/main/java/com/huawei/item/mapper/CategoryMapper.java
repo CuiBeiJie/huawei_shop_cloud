@@ -4,6 +4,8 @@ import com.huawei.item.pojo.Category;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import tk.mybatis.mapper.additional.idlist.IdListMapper;
+import tk.mybatis.mapper.common.IdsMapper;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  * @Description:分类管理数据库层
  */
 @org.apache.ibatis.annotations.Mapper
-public interface CategoryMapper extends Mapper<Category> {
+public interface CategoryMapper extends Mapper<Category>, IdListMapper<Category,Long> {
     /**
      * 查询最后一条数据
      * @return

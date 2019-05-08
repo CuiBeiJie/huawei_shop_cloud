@@ -130,4 +130,19 @@ public class BrandServiceImpl implements BrandService {
             throw new SelfException(ExceptionEnums.BRAND_DELETE_ERROR);
         }
     }
+
+    /**
+     * 根据id查询品牌
+     * @param brandId
+     * @return
+     */
+    @Override
+    public Brand queryBrandById(Long brandId) {
+
+        Brand brand = brandMapper.selectByPrimaryKey(brandId);
+        if(brand == null){
+            throw new SelfException(ExceptionEnums.BRAND_NOT_FOUND);
+        }
+        return brand;
+    }
 }

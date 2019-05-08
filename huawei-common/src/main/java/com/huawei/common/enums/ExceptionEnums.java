@@ -11,6 +11,7 @@ public enum  ExceptionEnums {
     BRAND_NOT_FOUND(404,"品牌没有查到"),
     CATEGORY_NOT_FOUND(404,"商品分类没有查到"),
     SPECGROUP_NOT_FOUND(404,"商品规格组没有查到"),
+    GOODS_NOT_FOUND(404,"商品没有查到"),
     SPECPARM(404,"商品规格参数没有查到"),
     CATEGORY_PARENTID_ERROR(400,"参数不能为负数"),
     BRAND_SAVE_ERROR(500,"新增品牌失败"),
