@@ -67,11 +67,13 @@ public class SpecificationServiceImpl implements SpecificationService {
         }
     }
 
-    //根据商品规格组id来查询规格参数
-    public List<SpecParam> querySpecParams(Long gid) {
+    //查询规格参数
+    public List<SpecParam> querySpecParams(Long gid,Long cid,Boolean searching) {
         //组装查询条件
         SpecParam specParam = new SpecParam();
         specParam.setGroupId(gid);
+        specParam.setCid(cid);
+        specParam.setSearching(searching);
         List<SpecParam> specParamsList = specParmMapper.select(specParam);
         if(CollectionUtils.isEmpty(specParamsList)){
             throw new SelfException(ExceptionEnums.SPECPARM);

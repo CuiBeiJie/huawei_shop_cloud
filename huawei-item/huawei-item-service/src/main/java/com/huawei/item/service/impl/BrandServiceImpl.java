@@ -145,4 +145,18 @@ public class BrandServiceImpl implements BrandService {
         }
         return brand;
     }
+
+    /**
+     * 根据cid查询品牌
+     * @param cid
+     * @return
+     */
+    @Override
+    public List<Brand> queryBrandByCatrgory(Long cid) {
+        List<Brand> brandList = brandMapper.queryBrandByCatrgory(cid);
+        if(CollectionUtils.isEmpty(brandList)){
+            throw new SelfException(ExceptionEnums.BRAND_NOT_FOUND);
+        }
+        return brandList;
+    }
 }

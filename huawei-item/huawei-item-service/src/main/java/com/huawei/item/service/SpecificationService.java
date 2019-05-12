@@ -21,7 +21,7 @@ public interface SpecificationService {
     //更新商品规格组
     void updateSpecGroup(SpecGroup specGroup);
     //根据商品规格组id查询规格参数
-    List<SpecParam> querySpecParams(Long gid);
+    List<SpecParam> querySpecParams(Long gid,Long cid,Boolean searching);
     //新增商品规格参数
     void saveSpecParm(SpecParam specParam);
     //更新商品规格参数

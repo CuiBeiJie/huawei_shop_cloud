@@ -1,6 +1,7 @@
 package com.huawei.item.service;
 
 import com.huawei.common.vo.PageResult;
+import com.huawei.item.param.SpuParam;
 import com.huawei.item.vo.SpuVO;
 
 /**
@@ -12,4 +13,6 @@ import com.huawei.item.vo.SpuVO;
 public interface GoodsSerivce {
     //分页查询商品
     PageResult<SpuVO> querySpuByPageAndSort(Integer page, Integer rows, Boolean saleable,String key);
+    //新增商品
+    void sageGoods(SpuParam spuParam);
 }

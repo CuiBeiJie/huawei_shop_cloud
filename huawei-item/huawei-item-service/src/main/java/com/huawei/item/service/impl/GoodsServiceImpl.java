@@ -5,11 +5,12 @@ import com.github.pagehelper.PageInfo;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.common.vo.PageResult;
+import com.huawei.item.mapper.SkuMapper;
 import com.huawei.item.mapper.SpuDetailMapper;
 import com.huawei.item.mapper.SpuMapper;
-import com.huawei.item.pojo.Brand;
-import com.huawei.item.pojo.Category;
-import com.huawei.item.pojo.Spu;
+import com.huawei.item.mapper.StockMapper;
+import com.huawei.item.param.SpuParam;
+import com.huawei.item.pojo.*;
 import com.huawei.item.service.BrandService;
 import com.huawei.item.service.CategoryService;
 import com.huawei.item.service.GoodsSerivce;
@@ -18,11 +19,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +41,10 @@ public class GoodsServiceImpl implements GoodsSerivce {
     private SpuMapper spuMapper;
     @Autowired
     private SpuDetailMapper spuDetailMapper;
+    @Autowired
+    private SkuMapper skuMapper;
+    @Autowired
+    private StockMapper stockMapper;
     @Autowired
     private CategoryService categoryService;
     @Autowired
@@ -76,6 +83,53 @@ public class GoodsServiceImpl implements GoodsSerivce {
         List<SpuVO> spuvoList = getCategoryAndBrandName(spuList);
 
         return new PageResult<SpuVO>(spuInfo.getTotal(),spuvoList);
+    }
+   //新增商品
+    @Transactional
+    public void sageGoods(SpuParam spuParam) {
+        //定义库存集合
+        List<Stock> stockList = new ArrayList<>();
+       // 保存spu
+        Spu spu = new Spu();
+        spu.setId(null);
+        spu.setBrandId(spuParam.getBrandId());
+        spu.setCid1(spuParam.getCid1());
+        spu.setCid2(spuParam.getCid2());
+        spu.setCid3(spuParam.getCid3());
+        spu.setTitle(spuParam.getTitle());
+        spu.setSubTitle(spuParam.getSubTitle());
+        spu.setSaleable(true);
+        spu.setValid(true);
+        spu.setCreateTime(new Date());
+        spu.setLastUpdateTime(spu.getCreateTime());
+        int count = spuMapper.insert(spu);
+        if(count != 1){
+            throw new SelfException(ExceptionEnums.GOODS_SAVE_ERROR);
+        }
+
+        // 保存spu详情
+        SpuDetail spuDetail = spuParam.getSpuDetail();
+        spuDetail.setSpuId(spu.getId());
+        spuDetailMapper.insert(spuDetail);
+
+        //保存sku
+        List<Sku> skus = spuParam.getSkus();
+        for (Sku sku : skus){
+            sku.setCreateTime(new Date());
+            sku.setLastUpdateTime(sku.getCreateTime());
+            sku.setSpuId(spu.getId());
+            count = skuMapper.insert(sku);
+            if(count != 1){
+                throw new SelfException(ExceptionEnums.GOODS_SAVE_ERROR);
+            }
+            //新增库存
+            Stock stock = new Stock();
+            stock.setSkuId(sku.getId());
+            stock.setStock(sku.getStock());
+            stockList.add(stock);
+        }
+        //批量插入库存
+        stockMapper.insertList(stockList);
     }
 
     //SpuVO对象填充分类和品牌名称

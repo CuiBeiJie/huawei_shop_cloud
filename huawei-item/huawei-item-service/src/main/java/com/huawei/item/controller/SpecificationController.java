@@ -96,16 +96,21 @@ public class SpecificationController {
     }
 
     /**
-     * 根据规格组id查询规格参数
+     * 查询规格参数
      * @param gid
-     * @return
+     * @return  http://api.huawei.com/api/item/spec/params?cid=76
      */
     @GetMapping("/params")
-    public ResponseEntity<List<SpecParam>> querySpecParam(@RequestParam(value="gid", required = false) Long gid){
-             if(null == gid){
+    public ResponseEntity<List<SpecParam>> querySpecParamList(
+            @RequestParam(value="gid", required = false) Long gid,
+            @RequestParam(value="cid", required = false) Long cid,
+            @RequestParam(value="searching", required = false) Boolean searching
+            ){
+             //入参不能全部为空
+             if(null == gid && null == cid && null == searching){
                  return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
              }
-        return ResponseEntity.ok(specificationService.querySpecParams(gid));
+        return ResponseEntity.ok(specificationService.querySpecParams(gid,cid,searching));
     }
 
     /**

@@ -26,7 +26,8 @@ public enum  ExceptionEnums {
     INVALID_FILE_TYPE(400,"文件类型不合法"),
     UPLOAD_FILE_ERROR(500,"上传文件失败"),
     EXISTS_SPECGROUP_NAME(500,"商品规格组名称已经存在"),
-    EXISTS_SPECPARM_NAME(500,"规格参数组内该规格参数名已经存在")
+    EXISTS_SPECPARM_NAME(500,"规格参数组内该规格参数名已经存在"),
+    GOODS_SAVE_ERROR(500,"商品新增失败")
     ;
     private Integer code;
     private String msg;
