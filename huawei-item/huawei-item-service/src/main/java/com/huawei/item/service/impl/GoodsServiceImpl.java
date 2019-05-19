@@ -23,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -86,9 +83,7 @@ public class GoodsServiceImpl implements GoodsSerivce {
     }
    //新增商品
     @Transactional
-    public void sageGoods(SpuParam spuParam) {
-        //定义库存集合
-        List<Stock> stockList = new ArrayList<>();
+    public void saveGoods(SpuParam spuParam) {
        // 保存spu
         Spu spu = new Spu();
         spu.setId(null);
@@ -111,13 +106,121 @@ public class GoodsServiceImpl implements GoodsSerivce {
         SpuDetail spuDetail = spuParam.getSpuDetail();
         spuDetail.setSpuId(spu.getId());
         spuDetailMapper.insert(spuDetail);
+        //新增sku和stock
+        saveSkuAndStock(spuParam,spu.getId());
+    }
 
+    /**
+     * 回显spu详情
+     * @param spuId 是spu的id
+     * @return
+     */
+    @Override
+    public SpuDetail querySpuDetailById(Long spuId) {
+
+        SpuDetail spuDetail = spuDetailMapper.selectByPrimaryKey(spuId);
+        if(spuDetail == null){
+            throw new SelfException(ExceptionEnums.GOODS_DETAIL_NOT_FOUND);
+        }
+        return spuDetail;
+    }
+
+    /**
+     * sku集合
+     * @param spuId
+     * @return
+     */
+    @Override
+    public List<Sku> querySkuBySpuId(Long spuId) {
+        // 查询sku
+        Sku record = new Sku();
+        record.setSpuId(spuId);
+        List<Sku> skus = skuMapper.select(record);
+        if(CollectionUtils.isEmpty(skus)){
+            throw new SelfException(ExceptionEnums.GOODS_SKU_NOT_FOUND);
+        }
+//        for (Sku sku : skus) {
+//            // 同时查询出库存
+//            Stock stock = stockMapper.selectByPrimaryKey(sku.getId());
+//            if(stock == null){
+//                throw new SelfException(ExceptionEnums.GOODS_STOCK_NOT_FOUND);
+//            }
+//            sku.setStock(stock.getStock());
+//        }
+        //查询库存
+        List<Long> ids = skus.stream().map(Sku::getId).collect(Collectors.toList());
+        //批量查询所有库存
+        List<Stock> stockList = stockMapper.selectByIdList(ids);
+        //把Stock做成Map，key是sku的id，value是库存值
+        Map<Long, Integer> stockMap = stockList.stream().collect(Collectors.toMap(Stock::getSkuId, Stock::getStock));
+        skus.forEach(s->s.setStock(stockMap.get(s.getId())));
+        return skus;
+    }
+
+    /**
+     * 修改商品
+     * @param spuParam
+     */
+    @Transactional
+    public void updateGoods(SpuParam spuParam) {
+         //删除sku
+        Sku sku = new Sku();
+        sku.setSpuId(spuParam.getId());
+        //查询sku
+        List<Sku> skuList = skuMapper.select(sku);
+        if(!CollectionUtils.isEmpty(skuList)){
+            //删除sku
+            skuMapper.delete(sku);
+            //删除stock
+            List<Long> ids = skuList.stream().map(Sku::getId).collect(Collectors.toList());
+            stockMapper.deleteByIdList(ids);
+        }
+        //修改spu
+        Spu spu = new Spu();
+        spu.setId(spuParam.getId());
+        spu.setBrandId(spuParam.getBrandId());
+        spu.setCid1(spuParam.getCid1());
+        spu.setCid2(spuParam.getCid2());
+        spu.setCid3(spuParam.getCid3());
+        spu.setTitle(spuParam.getTitle());
+        spu.setSubTitle(spuParam.getSubTitle());
+        spu.setSaleable(null);
+        spu.setValid(null);
+        spu.setLastUpdateTime(new Date());
+        spu.setCreateTime(null);
+        //updateByPrimaryKeySelective会对字段进行判断再更新(如果为Null就忽略更新)，如果你只想更新某一字段，可以用这个方法。
+        int count = spuMapper.updateByPrimaryKeySelective(spu);
+        if(count != 1){
+            throw new SelfException(ExceptionEnums.GOODS_UPDATE_ERROR);
+        }
+        //修改spudetail
+        count = spuDetailMapper.updateByPrimaryKeySelective(spuParam.getSpuDetail());
+        if(count != 1){
+            throw new SelfException(ExceptionEnums.GOODS_UPDATE_ERROR);
+        }
+        //新增sku和stock
+        saveSkuAndStock(spuParam,spu.getId());
+    }
+
+    /**
+     *新增sku和stock
+     * @param spuParam
+     * @param spuId
+     */
+    @Transactional
+    public void saveSkuAndStock(SpuParam spuParam,Long spuId){
+        if(spuId == null){
+          throw new SelfException(ExceptionEnums.GOODS_ID_CANNOT_BE_NULL);
+        }
+        int count;
+        //定义库存集合
+        List<Stock> stockList = new ArrayList<>();
         //保存sku
         List<Sku> skus = spuParam.getSkus();
         for (Sku sku : skus){
             sku.setCreateTime(new Date());
             sku.setLastUpdateTime(sku.getCreateTime());
-            sku.setSpuId(spu.getId());
+            sku.setSpuId(spuId);
             count = skuMapper.insert(sku);
             if(count != 1){
                 throw new SelfException(ExceptionEnums.GOODS_SAVE_ERROR);
@@ -129,7 +232,10 @@ public class GoodsServiceImpl implements GoodsSerivce {
             stockList.add(stock);
         }
         //批量插入库存
-        stockMapper.insertList(stockList);
+        count = stockMapper.insertList(stockList);
+        if(count!= stockList.size()){
+            throw new SelfException(ExceptionEnums.GOODS_SAVE_ERROR);
+        }
     }
 
     //SpuVO对象填充分类和品牌名称

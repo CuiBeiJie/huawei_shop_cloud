@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class SpuParam {
+    private Long id;
     private Long brandId;//品牌id
     private Long cid1;// 1级类目
     private Long cid2;// 2级类目

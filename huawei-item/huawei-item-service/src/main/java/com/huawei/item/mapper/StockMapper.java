@@ -1,5 +1,6 @@
 package com.huawei.item.mapper;
 
+import com.huawei.common.mapper.BaseMapper;
 import com.huawei.item.pojo.Stock;
 import tk.mybatis.mapper.additional.insert.InsertListMapper;
 import tk.mybatis.mapper.common.Mapper;
@@ -10,5 +11,5 @@ import tk.mybatis.mapper.common.Mapper;
  * @author: cuibeijie
  * @create: 2019-05-12 22:55
  */
-public interface StockMapper extends Mapper<Stock> , InsertListMapper<Stock> {
+public interface StockMapper extends BaseMapper<Stock> {
 }

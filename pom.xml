@@ -13,6 +13,7 @@
         <module>huawei-item</module>
         <module>huawei-common</module>
         <module>huawei-upload</module>
+        <module>huawei-search</module>
     </modules>
     <packaging>pom</packaging>
 

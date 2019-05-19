@@ -2,12 +2,16 @@ package com.huawei.item.controller;
 
 import com.huawei.common.vo.PageResult;
 import com.huawei.item.param.SpuParam;
+import com.huawei.item.pojo.Sku;
+import com.huawei.item.pojo.SpuDetail;
 import com.huawei.item.service.GoodsSerivce;
 import com.huawei.item.vo.SpuVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @program: huaweishop
@@ -19,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class GoodsController {
 
     @Autowired
-    private GoodsSerivce goodsSerivce;
+    private GoodsSerivce goodsService;
 
     /**
      * 分页查询SPU
@@ -35,20 +39,70 @@ public class GoodsController {
             @RequestParam(value = "saleable", required = false) Boolean saleable,
             @RequestParam(value = "key", required = false) String key) {
         // 分页查询spu信息
-        PageResult<SpuVO> result = goodsSerivce.querySpuByPageAndSort(page, rows,saleable, key);
+        PageResult<SpuVO> result = goodsService.querySpuByPageAndSort(page, rows,saleable, key);
         if (result == null || result.getItems().size() == 0) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * 新增商品
+     * @param spuParam
+     * @return
+     */
     @PostMapping("goods")
     public ResponseEntity<Void> saveGoods(@RequestBody SpuParam spuParam){
         try {
-            this.goodsSerivce.sageGoods(spuParam);
+            goodsService.saveGoods(spuParam);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * 修改商品
+     * @param spuParam
+     * @return
+     */
+    @PutMapping("goods")
+    public ResponseEntity<Void> updateGoods(@RequestBody SpuParam spuParam){
+        try {
+            goodsService.updateGoods(spuParam);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     *查询商品详情
+     * @param id 应该是spu_id
+     * @return
+     */
+    @GetMapping("/spu/detail/{id}")
+    public ResponseEntity<SpuDetail> querySpuDetailById(@PathVariable("id") Long id) {
+        SpuDetail detail = goodsService.querySpuDetailById(id);
+        if (detail == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(detail);
+    }
+
+    /**
+     * 根据spu查询下面所有sku
+     * @param id - 应该是spu的id
+     * @return
+     */
+    @GetMapping("sku/list")
+    public ResponseEntity<List<Sku>> querySkuBySpuId(@RequestParam("id") Long id) {
+        List<Sku> skus = goodsService.querySkuBySpuId(id);
+        if (skus == null || skus.size() == 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(skus);
     }
 }

@@ -1,5 +1,6 @@
 package com.huawei.item.mapper;
 
+import com.huawei.common.mapper.BaseMapper;
 import com.huawei.item.pojo.Sku;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -9,5 +10,5 @@ import tk.mybatis.mapper.common.Mapper;
  * @author: cuibeijie
  * @create: 2019-05-12 22:54
  */
-public interface SkuMapper extends Mapper<Sku> {
+public interface SkuMapper extends BaseMapper<Sku> {
 }

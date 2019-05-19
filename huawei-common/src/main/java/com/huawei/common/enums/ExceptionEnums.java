@@ -27,7 +27,12 @@ public enum  ExceptionEnums {
     UPLOAD_FILE_ERROR(500,"上传文件失败"),
     EXISTS_SPECGROUP_NAME(500,"商品规格组名称已经存在"),
     EXISTS_SPECPARM_NAME(500,"规格参数组内该规格参数名已经存在"),
-    GOODS_SAVE_ERROR(500,"商品新增失败")
+    GOODS_SAVE_ERROR(500,"商品新增失败"),
+    GOODS_DETAIL_NOT_FOUND(404,"商品详情不存在"),
+    GOODS_STOCK_NOT_FOUND(404,"商品库存不存在"),
+    GOODS_SKU_NOT_FOUND(404,"商品SKU不存在"),
+    GOODS_UPDATE_ERROR(500,"商品更新失败"),
+    GOODS_ID_CANNOT_BE_NULL(500,"商品id不能为空")
     ;
     private Integer code;
     private String msg;
