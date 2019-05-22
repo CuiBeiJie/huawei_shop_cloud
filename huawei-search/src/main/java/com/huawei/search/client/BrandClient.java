@@ -1,7 +1,12 @@
 package com.huawei.search.client;
 
 import com.huawei.item.api.BrandApi;
+import com.huawei.item.pojo.Brand;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * @program: huaweishop
@@ -11,4 +16,6 @@ import org.springframework.cloud.openfeign.FeignClient;
  */
 @FeignClient("item-service")
 public interface BrandClient extends BrandApi {
+    @GetMapping("brand/list")
+    List<Brand> queryBrandsByIds(@RequestParam("ids") List<Long> ids);
 }

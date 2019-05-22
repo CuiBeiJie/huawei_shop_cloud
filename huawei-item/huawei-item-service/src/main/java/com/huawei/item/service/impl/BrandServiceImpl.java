@@ -159,4 +159,18 @@ public class BrandServiceImpl implements BrandService {
         }
         return brandList;
     }
+
+    /**
+     * 批量查询品牌
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Brand> queryBrandsByIds(List<Long> ids) {
+        List<Brand> brandList = brandMapper.selectByIdList(ids);
+        if(CollectionUtils.isEmpty(brandList)){
+            throw new SelfException(ExceptionEnums.BRAND_NOT_FOUND);
+        }
+        return brandList;
+    }
 }

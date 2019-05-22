@@ -19,4 +19,6 @@ public interface BrandService {
     Brand queryBrandById(Long brandId);
     //根据cid查询品牌
     List<Brand> queryBrandByCatrgory(Long cid);
+    //批量查询品牌
+    List<Brand> queryBrandsByIds(List<Long> ids);
 }

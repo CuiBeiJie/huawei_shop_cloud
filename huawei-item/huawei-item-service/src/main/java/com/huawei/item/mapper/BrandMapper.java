@@ -1,5 +1,6 @@
 package com.huawei.item.mapper;
 
+import com.huawei.common.mapper.BaseMapper;
 import com.huawei.item.pojo.Brand;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -14,7 +15,7 @@ import java.util.List;
  * @Date: 2019/5/3 19:57
  * @Description:分类管理数据库层
  */
-public interface BrandMapper extends Mapper<Brand> {
+public interface BrandMapper extends BaseMapper<Brand> {
     /**
      * 新增商品分类和品牌中间表数据
      * @param cid 商品分类id

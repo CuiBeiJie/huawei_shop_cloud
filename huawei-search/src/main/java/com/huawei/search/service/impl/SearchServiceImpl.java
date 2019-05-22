@@ -13,14 +13,20 @@ import com.huawei.search.client.GoodsClient;
 import com.huawei.search.client.SpecificationClient;
 import com.huawei.search.pojo.Goods;
 import com.huawei.search.pojo.SearchRequest;
+import com.huawei.search.pojo.SearchResult;
 import com.huawei.search.repository.GoodsRepository;
 import com.huawei.search.service.SearchService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -36,6 +42,7 @@ import java.util.stream.Collectors;
  * @create: 2019-05-19 16:50
  */
 @Service
+@Slf4j
 public class SearchServiceImpl implements SearchService {
     @Autowired
     private CategoryClient categoryClient;
@@ -51,8 +58,10 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private GoodsRepository goodsRepository;
+
     /**
      * 根据spu导入Goods数据
+     *
      * @param spu
      * @return
      */
@@ -60,7 +69,7 @@ public class SearchServiceImpl implements SearchService {
         //查询分类
         List<Category> categories = categoryClient.queryCategoryListByIds(
                 Arrays.asList(spu.getCid1(), spu.getCid2(), spu.getCid3()));
-        if(CollectionUtils.isEmpty(categories)){
+        if (CollectionUtils.isEmpty(categories)) {
             throw new SelfException(ExceptionEnums.CATEGORY_NOT_FOUND);
         }
         //分类名称集合
@@ -68,25 +77,25 @@ public class SearchServiceImpl implements SearchService {
 
         //查询品牌
         Brand brand = brandClient.queryBrandByid(spu.getBrandId());
-        if(brand == null){
+        if (brand == null) {
             throw new SelfException(ExceptionEnums.BRAND_NOT_FOUND);
         }
         //搜索字段 拼接：标题、分类、品牌
-        String all = spu.getTitle()+ StringUtils.join(categorieNameList," ")+ brand.getName();
+        String all = spu.getTitle() + StringUtils.join(categorieNameList, " ") + brand.getName();
 
         //查询sku
         List<Sku> skuList = goodsClient.querySkuBySpuId(spu.getId());
-        if(CollectionUtils.isEmpty(skuList)){
+        if (CollectionUtils.isEmpty(skuList)) {
             throw new SelfException(ExceptionEnums.GOODS_NOT_FOUND);
         }
         //对sku进行处理(页面展示不需要sku的全部属性)
-        List<Map<String,Object>> skus = new ArrayList<>();
-        for (Sku sku:skuList) {
-            Map<String,Object> map = new HashMap<>();
-            map.put("id",sku.getId());
-            map.put("title",sku.getTitle());
-            map.put("price",sku.getPrice());
-            map.put("image",StringUtils.substringBefore(sku.getImages(),","));
+        List<Map<String, Object>> skus = new ArrayList<>();
+        for (Sku sku : skuList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", sku.getId());
+            map.put("title", sku.getTitle());
+            map.put("price", sku.getPrice());
+            map.put("image", StringUtils.substringBefore(sku.getImages(), ","));
             skus.add(map);
         }
         //处理价格
@@ -94,7 +103,7 @@ public class SearchServiceImpl implements SearchService {
 
         // 查询规格参数
         List<SpecParam> specParamsList = specificationClient.querySpecParamList(null, spu.getCid3(), true);
-        if(CollectionUtils.isEmpty(specParamsList)){
+        if (CollectionUtils.isEmpty(specParamsList)) {
             throw new SelfException(ExceptionEnums.SPECPARM);
         }
         //查询商品详情
@@ -105,22 +114,22 @@ public class SearchServiceImpl implements SearchService {
         Map<Long, List<String>> specialSpec = JsonUtils.nativeRead(spuDetail.getSpecialSpec(), new TypeReference<Map<Long, List<String>>>() {
         });
         //规格参数，key是规格参数的名称，值是规格参数的值
-        Map<String,Object> specs = new HashMap<>();
+        Map<String, Object> specs = new HashMap<>();
         for (SpecParam specParam : specParamsList) {
-             String key = specParam.getName();
-             if(specParam.getGeneric()){
-                 //通用参数
+            String key = specParam.getName();
+            if (specParam.getGeneric()) {
+                //通用参数
                 String value = genericSpec.get(specParam.getId());
-                 // 数值类型，需要存储一个分段
-                if(specParam.getNumeric()){
-                    value = chooseSegment(value,specParam);
-                    specs.put(key,value);
+                // 数值类型，需要存储一个分段
+                if (specParam.getNumeric()) {
+                    value = chooseSegment(value, specParam);
+                    specs.put(key, value);
                 }
-             }else{
-                 //特有参数
-                 //存入map
-                 specs.put(key,specialSpec.get(specParam.getId()));
-             }
+            } else {
+                //特有参数
+                //存入map
+                specs.put(key, specialSpec.get(specParam.getId()));
+            }
 
         }
 
@@ -146,12 +155,13 @@ public class SearchServiceImpl implements SearchService {
 
     /**
      * 搜索
+     *
      * @param request
      * @return
      */
     public PageResult<Goods> search(SearchRequest request) {
         String key = request.getKey();
-        if(StringUtils.isBlank(key)){
+        if (StringUtils.isBlank(key)) {
             // 如果用户没搜索条件，我们可以给默认的，或者返回null
             return null;
         }
@@ -163,23 +173,72 @@ public class SearchServiceImpl implements SearchService {
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         // 2、查询
         // 2.1、对结果进行筛选
-        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id","skus","subTitle"}, null));
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id", "skus", "subTitle"}, null));
         // 2.2、基本查询
         queryBuilder.withQuery(QueryBuilders.matchQuery("all", key));
 
         // 2.3、分页
         queryBuilder.withPageable(PageRequest.of(page, size));
 
+        //2.4、聚合分类和品牌
+        String categoryAggName = "category_agg"; // 商品分类聚合名称
+        String brandAggName = "brand_agg"; // 品牌聚合名称
+        // 对商品分类进行聚合
+        queryBuilder.addAggregation(AggregationBuilders.terms(categoryAggName).field("cid3"));
+        //对品牌进行聚合
+        queryBuilder.addAggregation(AggregationBuilders.terms(brandAggName).field("brandId"));
         // 3、返回结果
-        Page<Goods> result = goodsRepository.search(queryBuilder.build());
-
+        AggregatedPage<Goods> result = (AggregatedPage<Goods>) goodsRepository.search(queryBuilder.build());
         // 4、解析结果
+        //4.1 分页结果解析
         long total = result.getTotalElements();
-        long totalPage = (total + size - 1) / size;
-        return new PageResult<>(total, totalPage, result.getContent());
+        Integer totalPage = result.getTotalPages();
+        //4.2 聚合结果解析
+        Aggregations aggs = result.getAggregations();
+        //分类结果解析
+        List<Category> categories = parseCategoryAgg(aggs.get(categoryAggName));
+        //品牌结果解析
+        List<Brand> brands = parseBrandAgg(aggs.get(brandAggName));
+        return new SearchResult(total, totalPage, result.getContent(),categories,brands);
     }
 
-    private String chooseSegment(String value, SpecParam p){
+    /**
+     * 品牌聚合结果
+     * @param aggregation
+     * @return
+     */
+    private List<Brand> parseBrandAgg(Aggregation aggregation) {
+        try {
+            LongTerms brandAgg = (LongTerms) aggregation;
+            List<Long> bids = brandAgg.getBuckets().stream().map(bucket -> bucket.getKeyAsNumber().longValue())
+                    .collect(Collectors.toList());
+            List<Brand> brands = brandClient.queryBrandsByIds(bids);
+            return brands;
+        }catch (Exception e){
+            log.error("品牌聚合出现异常：", e);
+            return null;
+        }
+    }
+
+    /**
+     * 解析分类聚合结果
+     * @param aggregation
+     * @return
+     */
+    private List<Category> parseCategoryAgg(Aggregation aggregation) {
+        try{
+            LongTerms categoryAgg = (LongTerms) aggregation;
+            List<Long> cids = categoryAgg.getBuckets().stream().map(bucket -> bucket.getKeyAsNumber().longValue())
+                    .collect(Collectors.toList());
+            List<Category> categories = categoryClient.queryCategoryListByIds(cids);
+            return  categories;
+        }catch (Exception e){
+            log.error("分类聚合出现异常：", e);
+            return null;
+        }
+    }
+
+    private String chooseSegment(String value, SpecParam p) {
         double val = NumberUtils.toDouble(value);
         String result = "其它";
         // 保存数值段
@@ -188,16 +247,16 @@ public class SearchServiceImpl implements SearchService {
             // 获取数值范围
             double begin = NumberUtils.toDouble(segs[0]);
             double end = Double.MAX_VALUE;
-            if(segs.length == 2){
+            if (segs.length == 2) {
                 end = NumberUtils.toDouble(segs[1]);
             }
             // 判断是否在范围内
-            if(val >= begin && val < end){
-                if(segs.length == 1){
+            if (val >= begin && val < end) {
+                if (segs.length == 1) {
                     result = segs[0] + p.getUnit() + "以上";
-                }else if(begin == 0){
+                } else if (begin == 0) {
                     result = segs[1] + p.getUnit() + "以下";
-                }else{
+                } else {
                     result = segment + p.getUnit();
                 }
                 break;
