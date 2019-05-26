@@ -203,6 +203,28 @@ public class GoodsServiceImpl implements GoodsSerivce {
     }
 
     /**
+     * 查询spu
+     * @param id
+     * @return
+     */
+    @Override
+    public SpuParam querySpuById(Long id) {
+        SpuParam spuParam = new SpuParam();
+        //查询spu
+        Spu spu = spuMapper.selectByPrimaryKey(id);
+        if(spu == null){
+           throw new SelfException(ExceptionEnums.GOODS_NOT_FOUND);
+        }
+        //将Spu属性拷贝给SpuParam
+        BeanUtils.copyProperties(spu,spuParam);
+        //查询sku
+        spuParam.setSkus(querySkuBySpuId(id));
+        //查询spu详情
+        spuParam.setSpuDetail(querySpuDetailById(id));
+        return spuParam;
+    }
+
+    /**
      *新增sku和stock
      * @param spuParam
      * @param spuId

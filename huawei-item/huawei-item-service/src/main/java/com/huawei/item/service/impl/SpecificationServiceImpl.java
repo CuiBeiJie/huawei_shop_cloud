@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: huaweishop
@@ -111,4 +114,25 @@ public class SpecificationServiceImpl implements SpecificationService {
         }
     }
 
+    // 查询规格参数组，及组内参数
+    public List<SpecGroup> querySepcListBycid(Long cid) {
+        //查询规格组
+        List<SpecGroup> specGroups = querySepcGroupBycid(cid);
+        //查询当前分类下的所有规格参数
+        List<SpecParam> specParams = querySpecParams(null, cid, null);
+        //把规格参数做成一个map，key是groupId,value是组内所有规格参数
+        Map<Long,List<SpecParam>> map = new HashMap<>();
+        for (SpecParam specParam : specParams) {
+           if(!map.containsKey(specParam.getGroupId())){
+               //如果组id不存在，新建一个list
+               map.put(specParam.getGroupId(),new ArrayList<>());
+           }
+           map.get(specParam.getGroupId()).add(specParam);
+        }
+        //填充pram到specGroup
+        for (SpecGroup specGroup : specGroups) {
+            specGroup.setParams(map.get(specGroup.getId()));
+        }
+        return specGroups;
+    }
 }

@@ -105,4 +105,14 @@ public class GoodsController {
         }
         return ResponseEntity.ok(skus);
     }
+
+    /**
+     * 查询spu
+     * @param id
+     * @return
+     */
+    @GetMapping("spu/{id}")
+    ResponseEntity<SpuParam> querySpuById(@PathVariable("id") Long id){
+       return ResponseEntity.ok(goodsService.querySpuById(id));
+    }
 }

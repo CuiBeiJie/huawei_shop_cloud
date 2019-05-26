@@ -1,6 +1,7 @@
 package com.huawei.item.api;
 
 import com.huawei.common.vo.PageResult;
+import com.huawei.item.param.SpuParam;
 import com.huawei.item.pojo.Sku;
 import com.huawei.item.pojo.SpuDetail;
 import com.huawei.item.vo.SpuVO;
@@ -46,5 +47,11 @@ public interface GoodsApi {
             @RequestParam(value = "saleable", required = false) Boolean saleable,
             @RequestParam(value = "key", required = false) String key);
 
-
+    /**
+     * 根据spu的id查询spu
+     * @param id
+     * @return
+     */
+    @GetMapping("spu/{id}")
+    SpuParam querySpuById(@PathVariable("id") Long id);
 }

@@ -28,4 +28,6 @@ public interface SpecificationService {
     void updateSpecParam(SpecParam specParam);
     //删除商品规格参数
     void deleteSpecParam(Long id);
+    // 查询规格参数组，及组内参数
+    List<SpecGroup> querySepcListBycid(Long cid);
 }

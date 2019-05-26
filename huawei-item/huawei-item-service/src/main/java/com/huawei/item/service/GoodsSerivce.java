@@ -25,4 +25,6 @@ public interface GoodsSerivce {
     List<Sku> querySkuBySpuId(Long id);
    //修改商品
     void updateGoods(SpuParam spuParam);
+    //查询spu
+    SpuParam querySpuById(Long id);
 }

@@ -19,13 +19,18 @@ import com.huawei.search.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -58,6 +63,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private GoodsRepository goodsRepository;
+
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate;
 
     /**
      * 根据spu导入Goods数据
@@ -123,8 +131,8 @@ public class SearchServiceImpl implements SearchService {
                 // 数值类型，需要存储一个分段
                 if (specParam.getNumeric()) {
                     value = chooseSegment(value, specParam);
-                    specs.put(key, value);
                 }
+                specs.put(key, value);
             } else {
                 //特有参数
                 //存入map
@@ -175,7 +183,8 @@ public class SearchServiceImpl implements SearchService {
         // 2.1、对结果进行筛选
         queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id", "skus", "subTitle"}, null));
         // 2.2、基本查询
-        queryBuilder.withQuery(QueryBuilders.matchQuery("all", key));
+        QueryBuilder baseQuery = buildBasicQueryWithFilter(request);
+        queryBuilder.withQuery(baseQuery);
 
         // 2.3、分页
         queryBuilder.withPageable(PageRequest.of(page, size));
@@ -199,7 +208,77 @@ public class SearchServiceImpl implements SearchService {
         List<Category> categories = parseCategoryAgg(aggs.get(categoryAggName));
         //品牌结果解析
         List<Brand> brands = parseBrandAgg(aggs.get(brandAggName));
-        return new SearchResult(total, totalPage, result.getContent(),categories,brands);
+        //5.完成规格参数聚合
+        List<Map<String, Object>> specs = null;
+        //分类存在并且唯一时，才做规格参数聚合
+        if(categories != null && categories.size() == 1){
+            specs = buildSpecificationAgg(categories.get(0).getId(),baseQuery);
+        }
+        return new SearchResult(total, totalPage, result.getContent(),categories,brands,specs);
+    }
+
+    private QueryBuilder buildBasicQueryWithFilter(SearchRequest request) {
+        //创建布尔查询
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        //查询条件
+        boolQueryBuilder.must(QueryBuilders.matchQuery("all",request.getKey()));
+        //过滤条件
+        Map<String, String> map = request.getFilter();
+        for (Map.Entry<String,String> entry : map.entrySet()){
+            String key = entry.getKey();
+            String value =entry.getValue();
+            // 商品分类和品牌要特殊处理
+            if (key != "cid3" && key != "brandId") {
+                key = "specs." + key + ".keyword";
+            }
+            boolQueryBuilder.filter(QueryBuilders.termQuery(key,value));
+        }
+        return boolQueryBuilder;
+    }
+
+    /**
+     * 规格参数聚合
+     * @param id
+     * @param baseQuery
+     * @return
+     */
+    private List<Map<String,Object>> buildSpecificationAgg(Long cid, QueryBuilder baseQuery) {
+        try{
+            List<Map<String,Object>> specs =new ArrayList<>();
+            //1.根据分类查询可搜索过滤(需要聚合)的规格参数
+            List<SpecParam> specParams = specificationClient.querySpecParamList(null, cid, true);
+            //2.聚合
+            NativeSearchQueryBuilder queryBuilder =new NativeSearchQueryBuilder();
+            //2.1.带上查询条件,在查询的结果上进行聚合
+            queryBuilder.withQuery(baseQuery);
+            //2.2.聚合
+            for (SpecParam param : specParams) {
+                String name = param.getName();
+                queryBuilder.addAggregation(AggregationBuilders.terms(name).field("specs." + name + ".keyword"));
+            }
+            //3.获取结果
+               AggregatedPage<Goods> result = elasticsearchTemplate.queryForPage(queryBuilder.build(), Goods.class);
+            //AggregatedPage<Goods> result = (AggregatedPage<Goods>) goodsRepository.search(queryBuilder.build());
+            //解析结果
+            Aggregations aggs = result.getAggregations();
+            for (SpecParam specParam : specParams) {
+                //规格参数名称
+                String name = specParam.getName();
+                StringTerms terms = (StringTerms) aggs.get(name);
+                //规格参数待选项
+                List<String> options = terms.getBuckets().stream().
+                        map(bucket -> bucket.getKeyAsString()).collect(Collectors.toList());
+                //填充map
+                Map<String,Object> map =new HashMap<>();
+                map.put("k",name);
+                map.put("options",options);
+                specs.add(map);
+            }
+            return specs;
+        }catch (Exception e){
+            log.error("规格聚合出现异常：", e);
+            return null;
+        }
     }
 
     /**

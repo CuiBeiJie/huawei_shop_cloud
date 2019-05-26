@@ -1,5 +1,7 @@
 package com.huawei.search.pojo;
 
+import java.util.Map;
+
 /**
  * @program: huaweishop
  * @description: 接受页面请求参数对象
@@ -7,12 +9,11 @@ package com.huawei.search.pojo;
  * @create: 2019-05-19 23:01
  */
 public class SearchRequest {
-    private String key;// 搜索条件
-
-    private Integer page;// 当前页
-
     private static final Integer DEFAULT_SIZE = 20;// 每页大小，不从页面接收，而是固定大小
     private static final Integer DEFAULT_PAGE = 1;// 默认页
+    private String key;// 搜索条件
+    private Integer page;// 当前页
+    private Map<String,String> filter;//过滤项
 
     public String getKey() {
         return key;
@@ -36,5 +37,9 @@ public class SearchRequest {
 
     public Integer getSize() {
         return DEFAULT_SIZE;
+    }
+
+    public Map<String, String> getFilter() {
+        return filter;
     }
 }

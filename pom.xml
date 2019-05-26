@@ -14,6 +14,7 @@
         <module>huawei-common</module>
         <module>huawei-upload</module>
         <module>huawei-search</module>
+        <module>huawei-goods-page</module>
     </modules>
     <packaging>pom</packaging>
 
