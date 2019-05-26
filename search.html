@@ -386,7 +386,7 @@
                  resp.data.items.forEach(goods => {
                      //把json处理成js对象
                      goods.skus = JSON.parse(goods.skus);
-                     //初始化被选中的sku
+                     //初始化被选中的sku,取第一个
                      goods.selectedSku = goods.skus[0];
                  });
                  this.goodsList = resp.data.items;
