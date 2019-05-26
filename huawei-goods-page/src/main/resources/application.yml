@@ -5,6 +5,9 @@ spring:
     name: page-service
   thymeleaf:
     cache: false
+    mode: LEGACYHTML5
+    prefix: classpath:/templates/
+    suffix: .html
 eureka:
   client:
     service-url:
