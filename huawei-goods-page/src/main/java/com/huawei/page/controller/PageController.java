@@ -1,5 +1,6 @@
 package com.huawei.page.controller;
 
+import com.huawei.page.service.FileService;
 import com.huawei.page.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,8 @@ import java.util.Map;
 public class PageController {
     @Autowired
     private PageService pageService;
+    @Autowired
+    private FileService fileService;
     /**
      * 跳转到商品详情页
      * @param model
@@ -30,9 +33,12 @@ public class PageController {
     public String toItemPage(Model model, @PathVariable("id") Long spuId){
         // 加载所需的数据
         Map<String, Object> modelMap = pageService.loadModel(spuId);
-        System.out.println("modelMap===="+modelMap);
         // 放入模型
         model.addAllAttributes(modelMap);
+        // 判断是否需要生成新的页面
+        if(!this.fileService.exists(spuId)){
+            this.fileService.syncCreateHtml(spuId);
+        }
         return "item";
     }
 }
