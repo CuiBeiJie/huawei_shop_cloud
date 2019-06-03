@@ -5,6 +5,7 @@ import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.common.utils.JsonUtils;
 import com.huawei.common.vo.PageResult;
+import com.huawei.item.param.SpuParam;
 import com.huawei.item.pojo.*;
 import com.huawei.item.vo.SpuVO;
 import com.huawei.search.client.BrandClient;
@@ -28,6 +29,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -215,6 +217,20 @@ public class SearchServiceImpl implements SearchService {
             specs = buildSpecificationAgg(categories.get(0).getId(),baseQuery);
         }
         return new SearchResult(total, totalPage, result.getContent(),categories,brands,specs);
+    }
+
+    //创建或修改索引
+    public void createOrUpdateIndex(Long spuId) {
+        SpuParam spuParam = goodsClient.querySpuById(spuId);
+        SpuVO spuVO = new SpuVO();
+        BeanUtils.copyProperties(spuParam,spuVO);
+        Goods goods = buildGoods(spuVO);
+        goodsRepository.save(goods);
+    }
+
+    //删除索引
+    public void deleteIndex(Long spuId) {
+      goodsRepository.deleteById(spuId);
     }
 
     private QueryBuilder buildBasicQueryWithFilter(SearchRequest request) {

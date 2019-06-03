@@ -15,7 +15,10 @@ import com.huawei.item.service.BrandService;
 import com.huawei.item.service.CategoryService;
 import com.huawei.item.service.GoodsSerivce;
 import com.huawei.item.vo.SpuVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,7 @@ import java.util.stream.Collectors;
  * @create: 2019-05-08 20:59
  */
 @Service
+@Slf4j
 public class GoodsServiceImpl implements GoodsSerivce {
     @Autowired
     private SpuMapper spuMapper;
@@ -46,6 +51,8 @@ public class GoodsServiceImpl implements GoodsSerivce {
     private CategoryService categoryService;
     @Autowired
     private BrandService brandService;
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 // Preparing: SELECT id,brand_id,cid1,cid2,cid3,title,sub_title,saleable,valid,create_time,last_update_time FROM tb_spu
 // WHERE ( title like ? or saleable = ? )
 // order by last_update_time DESC LIMIT ?
@@ -108,6 +115,12 @@ public class GoodsServiceImpl implements GoodsSerivce {
         spuDetailMapper.insert(spuDetail);
         //新增sku和stock
         saveSkuAndStock(spuParam,spu.getId());
+        //发送mq消息
+        try {
+            amqpTemplate.convertAndSend("item.insert",spu.getId().toString().getBytes("utf-8"));
+        } catch (AmqpException | UnsupportedEncodingException e) {
+            log.error("新增商品{}发送消息失败",spu.getId(),e.getMessage());
+        }
     }
 
     /**
@@ -200,6 +213,13 @@ public class GoodsServiceImpl implements GoodsSerivce {
         }
         //新增sku和stock
         saveSkuAndStock(spuParam,spu.getId());
+
+        //发送mq消息
+        try {
+            amqpTemplate.convertAndSend("item.update",spu.getId().toString().getBytes("utf-8"));
+        } catch (AmqpException | UnsupportedEncodingException e) {
+            log.error("修改商品{}发送消息失败",spu.getId(),e.getMessage());
+        }
     }
 
     /**

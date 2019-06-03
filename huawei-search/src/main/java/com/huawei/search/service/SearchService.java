@@ -17,4 +17,8 @@ public interface SearchService {
     public Goods buildGoods(SpuVO spu);
     //搜索
     PageResult<Goods> search(SearchRequest request);
+    //创建或修改索引
+    void createOrUpdateIndex(Long spuId);
+    //删除索引
+    void deleteIndex(Long spuId);
 }

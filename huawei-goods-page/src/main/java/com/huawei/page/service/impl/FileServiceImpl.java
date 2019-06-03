@@ -108,4 +108,15 @@ public class FileServiceImpl implements FileService {
             }
         });
     }
+
+    /**
+     * 删除静态页
+     * @param spuId
+     */
+    public void deleteHtml(Long spuId) {
+          File dest = createPath(spuId);
+          if(dest.exists()){
+              dest.delete();
+          }
+    }
 }

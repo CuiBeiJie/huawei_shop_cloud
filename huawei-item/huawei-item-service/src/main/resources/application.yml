@@ -7,6 +7,19 @@ spring:
     url: jdbc:mysql://192.168.75.131:3306/huawei_shop?characterEncoding=UTF-8&useSSL=false
     username: root
     password: cf703861
+  rabbitmq:
+    host: 192.168.154.1
+    username: huawei
+    password: huawei
+    virtual-host: /huawei-shop
+    template:
+      retry:
+        enabled: true
+        initial-interval: 10000ms
+        max-interval: 300000ms
+        multiplier: 2
+      exchange: huawei.item.exchange
+    publisher-confirms: true
 eureka:
   client:
     service-url:

@@ -9,6 +9,14 @@ spring:
       cluster-nodes: 192.168.75.129:9300
   jackson:
     default-property-inclusion: non_null # 配置json处理时忽略空值
+  rabbitmq:
+    host: 192.168.154.1
+    username: huawei
+    password: huawei
+    virtual-host: /huawei-shop
+    listener:
+      simple:
+        acknowledge-mode: manual
 eureka:
   client:
     service-url:

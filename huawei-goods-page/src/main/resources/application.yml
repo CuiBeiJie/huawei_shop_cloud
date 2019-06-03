@@ -8,6 +8,14 @@ spring:
     mode: LEGACYHTML5
     prefix: classpath:/templates/
     suffix: .html
+  rabbitmq:
+    host: 192.168.154.1
+    username: huawei
+    password: huawei
+    virtual-host: /huawei-shop
+    listener:
+      simple:
+        acknowledge-mode: manual
 eureka:
   client:
     service-url:

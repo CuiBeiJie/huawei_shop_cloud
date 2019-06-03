@@ -13,4 +13,6 @@ public interface FileService {
     boolean exists(Long id);
     //异步生成商品详情静态html
     public void syncCreateHtml(Long id);
+    //删除静态页
+    void deleteHtml(Long spuId);
 }
