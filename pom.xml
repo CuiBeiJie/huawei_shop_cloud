@@ -15,6 +15,7 @@
         <module>huawei-upload</module>
         <module>huawei-search</module>
         <module>huawei-goods-page</module>
+        <module>huawei-sms</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -44,8 +45,8 @@
         <spring.webmvc.version>5.0.6.RELEASE</spring.webmvc.version>
         <thymeleaf.version>RELEASE</thymeleaf.version>
         <spring.amqp.version>2.1.0.M4</spring.amqp.version>
-        <aliyun.sdk.version>3.3.1</aliyun.sdk.version>
-        <aliyun.sms.sdk.version>1.0.0</aliyun.sms.sdk.version>
+        <aliyun.sdk.version>4.0.6</aliyun.sdk.version>
+        <aliyun.sms.sdk.version>1.1.0</aliyun.sms.sdk.version>
         <redis.version>2.1.0.M4</redis.version>
         <spring.security.version>5.1.0.RELEASE</spring.security.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
