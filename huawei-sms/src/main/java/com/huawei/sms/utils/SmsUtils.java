@@ -9,8 +9,13 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.huawei.sms.config.SmsProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @program: huaweishop
@@ -20,16 +25,34 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  */
 @Slf4j
 @EnableConfigurationProperties(SmsProperties.class)
+@Component
 public class SmsUtils {
 
     @Autowired
     private SmsProperties prop;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     //产品名称:云通信短信API产品,开发者无需替换
     static final String product = "Dysmsapi";
     //产品域名,开发者无需替换
     static final String domain = "dysmsapi.aliyuncs.com";
+    //短信前缀
+    private static final String KEY_PREFIX="sms:phone:";
+    //短信发送最小间隔
+    private static final long SMS_SEND_MIN_INTERVAL_IN_MILLS = 60000;
 
     public SendSmsResponse sendSms(String phoneNumber, String signName, String temPlateCode, String templateParam) {
+        String key = KEY_PREFIX + phoneNumber;
+        //对手机号码发送短信进行限流
+        String lastTime = redisTemplate.opsForValue().get(key);
+        if(StringUtils.isNotBlank(lastTime)){
+            //一分钟内只允许对一个手机号发送一次短信，防止触发阿里云限流
+            if (System.currentTimeMillis() - Long.valueOf(lastTime) < SMS_SEND_MIN_INTERVAL_IN_MILLS) {
+                log.info("[短信服务] 短信验证码发送频率过高，被拦截，请稍后再发，手机号码：{}",phoneNumber);
+                return null;
+            }
+        }
         try {
             //可自助调整超时时间
             System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
@@ -62,9 +85,12 @@ public class SmsUtils {
             SendSmsResponse resp = acsClient.getAcsResponse(request);
             if (!"OK".equals(resp.getCode())) {
                 log.info("[短信服务] 发送失败,phoneNumber:{},原因:{}", phoneNumber, resp.getMessage());
+                return null;
             }
+            log.info("[短信服务] 验证码发送成功，手机号码：{}",phoneNumber);
+            //短信发送成功后，写入redis
+            redisTemplate.opsForValue().set(key,String.valueOf(System.currentTimeMillis()),1, TimeUnit.MINUTES);
             return resp;
-
         } catch (Exception e) {
             log.error("[短信服务] 发送异常,phoneNumber:{},原因:{}", phoneNumber, e.getMessage());
             return null;

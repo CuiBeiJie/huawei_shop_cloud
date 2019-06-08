@@ -4,13 +4,15 @@ spring:
   application:
     name: sms-service
   rabbitmq:
-    host: 192.168.154.1
+    host: 192.168.154.1 #localhost
     username: huawei
     password: huawei
     virtual-host: /huawei-shop
+  redis:
+    host: 192.168.75.129
 huawei:
   sms:
-    accessKeyId: JWffwFJIwada # 你自己的accessKeyId
-    accessKeySecret: aySRliswq8fe7rF9gQyy1Izz4MQ # 你自己的AccessKeySecret
-    signName: 微服务商城 # 签名名称
-    verifyCodeTemplate: SMS_133976814 # 模板名称
+    accessKeyId: LTAIKiGbhMtZTWEJ # 你自己的accessKeyId
+    accessKeySecret: yr8gZZTOWfZarKMmRfIg5lnckBsxSy # 你自己的AccessKeySecret
+    signName: 华为微服务商城 # 签名名称
+    verifyCodeTemplate: SMS_167396013 # 模板名称
