@@ -33,7 +33,7 @@ public class SmsListener {
             exchange = @Exchange(value = "huawei.sms.exchange",
                     ignoreDeclarationExceptions = "true"),
             key = {"sms.verify.code"}))
-    public void listenSms(Map<String, String> msg) throws Exception {
+    public void listenSms(Map<String, String> msg)  {
         if(CollectionUtils.isEmpty(msg)){
             return;
         }
@@ -41,6 +41,7 @@ public class SmsListener {
        if(StringUtils.isBlank(phone)){
            return;
        }
+        System.out.println("===msg==="+JsonUtils.serialize(msg));
        //处理消息
         smsUtils.sendSms(phone,prop.getSignName(),prop.getVerifyCodeTemplate(), JsonUtils.serialize(msg));
     }
