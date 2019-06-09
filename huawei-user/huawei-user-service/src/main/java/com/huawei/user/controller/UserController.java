@@ -4,11 +4,17 @@ package com.huawei.user.controller;/**
  * @Description:
  */
 
+import com.huawei.common.exception.SelfException;
+import com.huawei.user.pojo.User;
 import com.huawei.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 /**
  * @Auther: cuibeijie
@@ -41,5 +47,40 @@ public class UserController {
     @PostMapping("code")
     public ResponseEntity<String> sendVerifyCode(@RequestParam("phone") String phone) {
         return ResponseEntity.ok(userService.sendVerifyCode(phone));
+    }
+
+    /**
+     * 注册
+     * @param user
+     * @param code
+     * @return
+     */
+    @PostMapping("register")
+    public ResponseEntity<Void> register(@Valid User user, BindingResult result, @RequestParam("code") String code) {
+        //参数后面加上BindingResult，异常可以自定义处理，这样spring就不会帮我们抛出了，
+        // 如果想让spring自己抛出把BindingResult去掉就行了
+        if(result.hasFieldErrors()){
+           throw new RuntimeException(result.getFieldErrors().stream().
+                   map(e -> e.getDefaultMessage()).collect(Collectors.joining("|")));
+        }
+        Boolean boo = userService.register(user, code);
+        if (boo == null || !boo) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    /**
+     * 根据用户名和密码查询用户
+     * @param username
+     * @param password
+     * @return
+     */
+    @GetMapping("query")
+    public ResponseEntity<User> queryUserByUserNameAndPassWord(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password
+    ) {
+        return ResponseEntity.ok(userService.queryUserByUserNameAndPassWord(username, password));
     }
 }

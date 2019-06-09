@@ -4,6 +4,8 @@ package com.huawei.user.service;/**
  * @Description:
  */
 
+import com.huawei.user.pojo.User;
+
 /**
  * @Auther: ccuibeijie
  * @Date: 2019/6/8 22:15
@@ -14,4 +16,8 @@ public interface UserService {
     Boolean checkData(String data, Integer type);
     //发送短信验证码
     String sendVerifyCode(String phone);
+    //用户注册
+    Boolean register(User user, String code);
+    //根据用户名和密码查询用户
+    User queryUserByUserNameAndPassWord(String username, String password);
 }

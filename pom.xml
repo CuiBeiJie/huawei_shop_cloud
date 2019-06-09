@@ -17,6 +17,7 @@
         <module>huawei-goods-page</module>
         <module>huawei-sms</module>
         <module>huawei-user</module>
+        <module>huawei-auth-center</module>
     </modules>
     <packaging>pom</packaging>
 

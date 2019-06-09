@@ -33,7 +33,9 @@ public enum  ExceptionEnums {
     GOODS_SKU_NOT_FOUND(404,"商品SKU不存在"),
     GOODS_UPDATE_ERROR(500,"商品更新失败"),
     GOODS_ID_CANNOT_BE_NULL(500,"商品id不能为空"),
-    INVALID_USER_DATA_TYPE(400,"用户类型请求参数有误")
+    INVALID_USER_DATA_TYPE(400,"用户类型请求参数有误"),
+    INVALID_VERIFY_CODE(400,"无效的验证码"),
+    INVALID_USERNAME_PASSWORD(500,"用户名或者密码错误")
     ;
     private Integer code;
     private String msg;
