@@ -4,8 +4,8 @@ const shortcut = {
         <div class='shortcut'> \
             <ul class='fl'> \
                <li class='f-item'>乐优欢迎您！</li> \
-               <li class='f-item' v-if='user && user.username'>\
-               尊敬的会员，<span style='color: red;'>{{user.username}}</span>\
+               <li class='f-item' v-if='user && user.name'>\
+               尊敬的会员，<span style='color: red;'>{{user.name}}</span>\
                </li>\
                <li v-else class='f-item'> \
                    请<a href='javascript:void(0)' @click='gotoLogin'>登录</a>　 \
