@@ -14,3 +14,10 @@ eureka:
     prefer-ip-address: true
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:${server.port}
+huawei:
+  jwt:
+    secret: huawei@Login(Auth}*^31)&cloud% # 登录校验的密钥
+    pubKeyPath: D:/localFile/rsa.pub # 公钥地址
+    priKeyPath: D:/localFile/rsa.pri # 私钥地址
+    expire: 30 # 过期时间,单位分钟
+    cookieName: HUAWEI_SHOP_TOKEN #cookie名称
