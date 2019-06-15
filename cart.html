@@ -31,7 +31,7 @@
             <h4>全部商品<span>11</span></h4>
             <div class="cart-main">
                 <div class="yui3-g cart-th">
-                    <div class="yui3-u-1-4"><input type="checkbox"/> 全部</div>
+                    <div class="yui3-u-1-4"><input type="checkbox"  v-on:click="isSelectAll('upper')" id="checkboxA"/> 全部</div>
                     <div class="yui3-u-1-4">商品</div>
                     <div class="yui3-u-1-8">单价（元）</div>
                     <div class="yui3-u-1-8">数量</div>
@@ -42,31 +42,33 @@
 
                     <div class="cart-body">
                         <div class="cart-list">
-                            <ul class="goods-list yui3-g">
+                            <ul class="goods-list yui3-g" v-for="(c,i) in carts" :key="i">
                                 <li class="yui3-u-1-24">
-                                    <input type="checkbox" name="" value="" />
+                                    <input type="checkbox" v-model="selected"  :value="c" />
                                 </li>
                                 <li class="yui3-u-11-24">
                                     <div class="good-item">
-                                        <div class="item-img"><img src="img/goods.png" width="80px" height="80px"/></div>
+                                        <div class="item-img"><img :src="c.image" width="80px" height="80px"/></div>
                                         <div class="item-msg">
-												<span style="line-height:70px ">
-													Apple Macbook Air 13.3英寸笔记本电脑 银色（Corei5）处理器/8GB内存
-														尺寸：13.3英寸
+												<span>
+                                                    {{c.title}} <br>
+                                                    <span v-for="(v,k) in JSON.parse(c.ownSpec)" :key="k">
+                                                        {{k}}:{{v}} <br>
+                                                    </span>
 												</span>
                                         </div>
                                     </div>
                                 </li>
 
-                                <li class="yui3-u-1-8"><span style="line-height:70px " class="price">8848.00</span></li>
+                                <li class="yui3-u-1-8"><span style="line-height:70px " class="price">{{ly.formatPrice(c.price)}}</span></li>
                                 <li class="yui3-u-1-8" style="padding-top: 20px">
-                                    <a href="javascript:void(0)" class="increment mins">-</a>
-                                    <input autocomplete="off" type="text" value="1" minnum="1" class="itxt" />
-                                    <a href="javascript:void(0)" class="increment plus">+</a>
+                                    <a href="javascript:void(0)" class="increment mins" @click="decrement(c)">-</a>
+                                    <input autocomplete="off" type="text" v-model="c.num" minnum="1" class="itxt" />
+                                    <a href="javascript:void(0)" class="increment plus" @click="increment(c)">+</a>
                                 </li>
-                                <li class="yui3-u-1-8"><span style="line-height:70px " class="sum">8848.00</span></li>
+                                <li class="yui3-u-1-8"><span style="line-height:70px " class="sum">{{ly.formatPrice(c.price * c.num)}}</span></li>
                                 <li class="yui3-u-1-8">
-                                    <a href="#none">删除</a><br />
+                                    <a href="#none" @click="deleteCart(i)">删除</a><br />
                                     <a href="#none">移到我的关注</a>
                                 </li>
                             </ul>
@@ -77,18 +79,18 @@
             </div>
             <div class="cart-tool">
                 <div class="select-all">
-                    <input type="checkbox" name="" id="" value=""/>
+                    <input type="checkbox" v-on:click="isSelectAll('lower')" id="checkboxB"/>
                     <span>全选</span>
                 </div>
                 <div class="option">
-                    <a href="#none">删除选中的商品</a>
+                    <a href="#none" @click="deleteSelectedCart()">删除选中的商品</a>
                     <a href="#none">移到我的关注</a>
                     <a href="#none">清除下柜商品</a>
                 </div>
                 <div class="toolbar">
                     <div class="chosed">已选择<span>0</span>件商品</div>
                     <div class="sumprice">
-                        <span><em>总价（不含运费） ：</em><i class="summoney">8848.00</i></span>
+                        <span><em>总价（不含运费） ：</em><i class="summoney">{{ly.formatPrice(totalPrice)}}</i></span>
                         <span><em>已节省：</em><i>-¥20.00</i></span>
                     </div>
                     <div class="sumbtn">
@@ -264,6 +266,129 @@
     var cartVm = new Vue({
         el: "#cartApp",
         data: {
+            ly,
+            carts: [],// 购物车数据
+            selected: [],// 选中的商品
+            selectAll: false, //是否全选
+       },
+        created() {
+            this.loadCarts();
+        },
+        methods: {
+            loadCarts() {
+                // 先判断登录状态
+                ly.verifyUser()
+                    .then(() => {
+                        // 已登录
+
+                    })
+                    .catch(() => {
+                        // 未登录
+                        this.carts = ly.store.get("carts") || [];
+                    })
+            },
+            increment(c) {
+                c.num++;
+                ly.verifyUser()
+                    .then(() => {
+                        // TODO 已登录，向后台发起请求
+                    })
+                    .catch(() => {
+                        // 未登录，直接操作本地数据
+                        ly.store.set("carts", this.carts);
+                })
+            },
+            decrement(c) {
+                if (c.num <= 1) {
+                    return;
+                }
+                c.num = c.num - 1;
+                ly.verifyUser()
+                    .then(() => {
+                    // TODO 已登录，向后台发起请求
+                    })
+                    .catch(() => {
+                        // 未登录，直接操作本地数据
+                        ly.store.set("carts", this.carts);
+                    })
+            },
+            deleteCart(i){
+                ly.verifyUser()
+                    .then(() => {
+                        // 已登录
+                    })
+                    .catch(() => {
+                        // 未登录
+                        //被移除的购物车
+                        var skuId = this.carts[i].skuId;
+                        this.carts.splice(i, 1);
+                        //刷新已选择的购物车
+                        this.selected.splice(this.selected.findIndex((item => item.skuId === skuId)),1);
+                        ly.store.set("carts", this.carts);
+                    })
+           },
+            deleteSelectedCart(){
+                ly.verifyUser()
+                    .then(() => {
+                        // 已登录
+                    })
+                    .catch(() => {
+                        // 未登录
+                        var currentObj = this;
+                        this.selected.forEach(function(val, index) {
+                            currentObj.carts.splice(currentObj.carts.findIndex(item => item.skuId === val.skuId), 1);
+                            //刷新已选择的购物车
+                            //currentObj.selected.splice(currentObj.selected.findIndex((itemAA => itemAA.skuId === val.skuId)),1);
+                        });
+                        ly.store.set("carts", this.carts);
+                    })
+                  
+            },
+            aaa(skuId){
+               this.carts.forEach(function(val,index){
+                   if(skuId === index){
+                        return index;
+                   }
+               });
+            },
+            isSelectAll(postion){
+                ly.verifyUser()
+                    .then(() => {
+                        // 已登录
+                    })
+                    .catch(() => {
+                        // 未登录
+                        var $boxA= document.getElementById('checkboxA');
+                        var $boxB= document.getElementById('checkboxB');
+                        if(postion === 'upper'){
+                                if($boxA.checked === true){
+                                    this.selected = this.carts;
+                                    this.selectAll = true;
+                                    $boxB.checked = true;
+                                }else{
+                                    this.selected = [];
+                                    this.selectAll = false;
+                                    $boxB.checked =false;
+                                }
+                        }
+                        if(postion === 'lower'){
+                                if($boxB.checked === true){
+                                    this.selected = this.carts;
+                                    this.selectAll = true;
+                                    $boxA.checked = true;
+                                }else{
+                                    this.selected = [];
+                                    this.selectAll = false;
+                                    $boxA.checked =false;
+                                }
+                        }   
+                    })     
+           }
+        },
+        computed: {
+            totalPrice() {
+                return this.selected.map(c => c.num * c.price).reduce((p1, p2) => p1 + p2, 0);
+            }
         },
         components: {
             shortcut: () => import("/js/pages/shortcut.js")
