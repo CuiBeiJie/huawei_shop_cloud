@@ -1427,7 +1427,7 @@ public class JwtProperties {
  **/
 @Component
 @EnableConfigurationProperties(JwtProperties.class)
-public class LoginFilter extends ZuulFilter {
+public class AuthFilter extends ZuulFilter {
 
     @Autowired
     private JwtProperties prop;
@@ -1546,7 +1546,7 @@ public class FilterProperties {
 ```java
 @Component
 @EnableConfigurationProperties({JwtProperties.class, FilterProperties.class})
-public class LoginFilter extends ZuulFilter {
+public class AuthFilter extends ZuulFilter {
 
     @Autowired
     private JwtProperties jwtProp;
@@ -1625,3 +1625,32 @@ public class LoginFilter extends ZuulFilter {
 
 
 
+## **4.4.可优化的点**
+
+授权登录还需要完善：
+
+  1.需要引入权限管理系统
+
+  2.在AuthFilter应该要判断权限
+
+  3.授权中心还可以做服务鉴权
+
+
+
+面试点：
+
+- 如果cookie被禁用怎么办？
+
+  1.首先可以提示用户，网站必须使用cookie,不能禁用。
+
+  2.把tooken放入返回头返回，JS获取头信息，放入web存储（Local Storage，Session Storage），每次请求都要携带token放入头中。
+
+- 如果cookie被盗用怎么办？
+
+   1.我们的cookie无法篡改
+
+   2.加入ip地址识别身份放入Payload中（提示你的身份信息可能被盗用）
+
+  3.使用https协议（防止被截取）
+
+- 微服务地址暴露怎么办？
