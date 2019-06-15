@@ -163,11 +163,18 @@ public class GoodsServiceImpl implements GoodsSerivce {
         //查询库存
         List<Long> ids = skus.stream().map(Sku::getId).collect(Collectors.toList());
         //批量查询所有库存
+        fillStock(skus, ids);
+        return skus;
+    }
+
+    private void fillStock(List<Sku> skus, List<Long> ids) {
         List<Stock> stockList = stockMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(stockList)) {
+            throw new SelfException(ExceptionEnums.GOODS_STOCK_NOT_FOUND);
+        }
         //把Stock做成Map，key是sku的id，value是库存值
         Map<Long, Integer> stockMap = stockList.stream().collect(Collectors.toMap(Stock::getSkuId, Stock::getStock));
         skus.forEach(s->s.setStock(stockMap.get(s.getId())));
-        return skus;
     }
 
     /**
@@ -242,6 +249,20 @@ public class GoodsServiceImpl implements GoodsSerivce {
         //查询spu详情
         spuParam.setSpuDetail(querySpuDetailById(id));
         return spuParam;
+    }
+
+    /**
+     * 根据sku ids查询sku
+     * @param ids
+     * @return
+     */
+    public List<Sku> querySkusByIds(List<Long> ids) {
+        List<Sku> skus = skuMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(skus)) {
+            throw new SelfException(ExceptionEnums.GOODS_NOT_FOUND);
+        }
+        fillStock(skus,ids);
+        return skus;
     }
 
     /**

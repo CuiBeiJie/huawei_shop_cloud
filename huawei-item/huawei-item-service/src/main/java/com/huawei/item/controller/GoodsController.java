@@ -105,7 +105,15 @@ public class GoodsController {
         }
         return ResponseEntity.ok(skus);
     }
-
+    /**
+     * 根据sku ids查询sku
+     * @param ids
+     * @return
+     */
+    @GetMapping("sku/list/ids")
+    public ResponseEntity<List<Sku>> querySkusByIds(@RequestParam("ids") List<Long> ids) {
+        return ResponseEntity.ok(goodsService.querySkusByIds(ids));
+    }
     /**
      * 查询spu
      * @param id

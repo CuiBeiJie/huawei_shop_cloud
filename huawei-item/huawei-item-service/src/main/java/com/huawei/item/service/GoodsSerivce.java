@@ -27,4 +27,6 @@ public interface GoodsSerivce {
     void updateGoods(SpuParam spuParam);
     //查询spu
     SpuParam querySpuById(Long id);
+    //根据sku ids查询sku
+    List<Sku> querySkusByIds(List<Long> ids);
 }

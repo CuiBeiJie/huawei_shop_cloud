@@ -2,8 +2,7 @@ package com.huawei.item.mapper;
 
 import com.huawei.common.mapper.BaseMapper;
 import com.huawei.item.pojo.Stock;
-import tk.mybatis.mapper.additional.insert.InsertListMapper;
-import tk.mybatis.mapper.common.Mapper;
+
 
 /**
  * @program: huaweishop
