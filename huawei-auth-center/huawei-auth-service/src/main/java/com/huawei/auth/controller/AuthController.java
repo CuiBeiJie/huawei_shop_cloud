@@ -8,6 +8,8 @@ import com.huawei.auth.config.JwtProperties;
 import com.huawei.auth.entity.UserInfo;
 import com.huawei.auth.service.AuthService;
 import com.huawei.auth.utils.JwtUtils;
+import com.huawei.common.enums.ExceptionEnums;
+import com.huawei.common.exception.SelfException;
 import com.huawei.common.utils.CookieUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,9 @@ public class AuthController {
      */
     @GetMapping("verify")
     public ResponseEntity<UserInfo> verifyUser(@CookieValue("HUAWEI_SHOP_TOKEN") String token, HttpServletRequest request, HttpServletResponse response) {
+        if(StringUtils.isBlank(token)){
+            throw new SelfException(ExceptionEnums.UNAUTHORIZED);
+        }
         try {
             //从Token中获取用户信息
             UserInfo userInfo = JwtUtils.getUserInfo(prop.getPublicKey(), token);
