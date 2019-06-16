@@ -37,7 +37,8 @@ public enum  ExceptionEnums {
     INVALID_VERIFY_CODE(400,"无效的验证码"),
     INVALID_USERNAME_PASSWORD(400,"用户名或者密码错误"),
     CREATE_TOKEN_ERROR(500,"用户凭证生成失败"),
-    UNAUTHORIZED(401,"用户未授权")
+    UNAUTHORIZED(401,"用户未授权"),
+    CART_NOT_FOUND(404,"购物车中商品不存在")
     ;
     private Integer code;
     private String msg;
