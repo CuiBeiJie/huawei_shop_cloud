@@ -322,8 +322,7 @@
                         //被移除的购物车
                         var skuId = this.carts[i].skuId;
                         this.carts.splice(i, 1);
-                        //刷新已选择的购物车
-                        this.selected.splice(this.selected.findIndex((item => item.skuId === skuId)),1);
+                        this.selected.splice(this.selected.findIndex(item => item.skuId === skuId),1);
                         ly.store.set("carts", this.carts);
                     })
            },
@@ -337,19 +336,12 @@
                         var currentObj = this;
                         this.selected.forEach(function(val, index) {
                             currentObj.carts.splice(currentObj.carts.findIndex(item => item.skuId === val.skuId), 1);
-                            //刷新已选择的购物车
-                            //currentObj.selected.splice(currentObj.selected.findIndex((itemAA => itemAA.skuId === val.skuId)),1);
                         });
+                        //购物车勾选的商品置空
+                        this.selected = [];
                         ly.store.set("carts", this.carts);
                     })
                   
-            },
-            aaa(skuId){
-               this.carts.forEach(function(val,index){
-                   if(skuId === index){
-                        return index;
-                   }
-               });
             },
             isSelectAll(postion){
                 ly.verifyUser()
@@ -362,7 +354,7 @@
                         var $boxB= document.getElementById('checkboxB');
                         if(postion === 'upper'){
                                 if($boxA.checked === true){
-                                    this.selected = this.carts;
+                                    this.selected = $.extend(true, [], this.carts); //采用深度复制，而不是双向绑定
                                     this.selectAll = true;
                                     $boxB.checked = true;
                                 }else{
@@ -373,7 +365,7 @@
                         }
                         if(postion === 'lower'){
                                 if($boxB.checked === true){
-                                    this.selected = this.carts;
+                                    this.selected = $.extend(true, [], this.carts);//采用深度复制，而不是双向绑定
                                     this.selectAll = true;
                                     $boxA.checked = true;
                                 }else{
