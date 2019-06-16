@@ -113,4 +113,17 @@ public class CartServiceImpl implements CartSevice {
         hashOps.delete(skuId.toString());
     }
 
+    /**
+     * 批量删除购物车中商品
+     * @param skuIds
+     */
+    public void batchDeleteCart(List<Long> skuIds) {
+        // 获取登录用户
+        UserInfo loginUser = UserInterCeptor.getLoginUser();
+        String key = KEY_PREFIX + loginUser.getId();
+        BoundHashOperations<String, Object, Object> hashOps = this.redisTemplate.boundHashOps(key);
+        for (Long skuId: skuIds) {
+            hashOps.delete(skuId.toString());
+        }
+    }
 }

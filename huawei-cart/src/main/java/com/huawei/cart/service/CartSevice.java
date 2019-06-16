@@ -18,4 +18,6 @@ public interface CartSevice {
     void updateNum(Long skuId, Integer num);
     //删除购物车中商品
     void deleteCart(String skuId);
+    //批量删除购物车中商品
+    void batchDeleteCart(List<Long> skuIds);
 }

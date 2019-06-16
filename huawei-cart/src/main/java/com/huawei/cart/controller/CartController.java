@@ -62,4 +62,15 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * 批量删除购物车中商品
+     * @param skuIds
+     * @return
+     */
+    @DeleteMapping("/batchDeleteCart")
+    public ResponseEntity<Void> batchDeleteCart(@RequestParam("ids") List<Long> skuIds){
+        cartSevice.batchDeleteCart(skuIds);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }
