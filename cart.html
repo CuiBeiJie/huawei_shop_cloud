@@ -28,7 +28,7 @@
 
         <!--All goods-->
         <div class="allgoods">
-            <h4>全部商品<span>11</span></h4>
+            <h4><span v-text="this.carts.length === 0?'亲，你的购物车全空哦，赶快去购物吧!':'购物车商品:'+ this.carts.length"></span></h4>
             <div class="cart-main">
                 <div class="yui3-g cart-th">
                     <div class="yui3-u-1-4"><input type="checkbox"  v-on:click="isSelectAll('upper')" id="checkboxA"/> 全部</div>
@@ -280,6 +280,9 @@
                 ly.verifyUser()
                     .then(() => {
                         // 已登录
+                        ly.http.get("/cart").then(({ data }) => {
+                          this.carts = data || [];
+                        })
 
                     })
                     .catch(() => {
@@ -292,6 +295,12 @@
                 ly.verifyUser()
                     .then(() => {
                         // TODO 已登录，向后台发起请求
+                        ly.http.put("/cart",ly.stringify({
+                            skuId: c.skuId,
+                              num: c.num
+                        })).catch(() => {
+                            alert("服务器繁忙！");
+                        })
                     })
                     .catch(() => {
                         // 未登录，直接操作本地数据
@@ -306,6 +315,12 @@
                 ly.verifyUser()
                     .then(() => {
                     // TODO 已登录，向后台发起请求
+                        ly.http.put("/cart",ly.stringify({
+                            skuId: c.skuId,
+                              num: c.num
+                        })).catch(() => {
+                            alert("服务器繁忙！");
+                        })
                     })
                     .catch(() => {
                         // 未登录，直接操作本地数据
@@ -316,6 +331,14 @@
                 ly.verifyUser()
                     .then(() => {
                         // 已登录
+                        ly.http.delete("/cart/" + this.carts[i].skuId)
+                          .then(() => {
+                            var skuId = this.carts[i].skuId;
+                            this.carts.splice(i,1);
+                            //删除购物车中已经勾选的商品
+                            this.selected.splice(this.selected.findIndex(item => item.skuId === skuId),1);
+                          })
+                          .catch(() => {alert("删除购物车中商品失败！");})
                     })
                     .catch(() => {
                         // 未登录
@@ -344,37 +367,31 @@
                   
             },
             isSelectAll(postion){
-                ly.verifyUser()
-                    .then(() => {
-                        // 已登录
-                    })
-                    .catch(() => {
-                        // 未登录
-                        var $boxA= document.getElementById('checkboxA');
-                        var $boxB= document.getElementById('checkboxB');
-                        if(postion === 'upper'){
-                                if($boxA.checked === true){
-                                    this.selected = $.extend(true, [], this.carts); //采用深度复制，而不是双向绑定
-                                    this.selectAll = true;
-                                    $boxB.checked = true;
-                                }else{
-                                    this.selected = [];
-                                    this.selectAll = false;
-                                    $boxB.checked =false;
-                                }
+                var $boxA= document.getElementById('checkboxA');
+                var $boxB= document.getElementById('checkboxB');
+                if(postion === 'upper'){
+                        if($boxA.checked === true){
+                            this.selected = $.extend(true, [], this.carts); //采用深度复制，而不是双向绑定
+                            this.selectAll = true;
+                            $boxB.checked = true;
+                        }else{
+                            this.selected = [];
+                            this.selectAll = false;
+                            $boxB.checked =false;
                         }
-                        if(postion === 'lower'){
-                                if($boxB.checked === true){
-                                    this.selected = $.extend(true, [], this.carts);//采用深度复制，而不是双向绑定
-                                    this.selectAll = true;
-                                    $boxA.checked = true;
-                                }else{
-                                    this.selected = [];
-                                    this.selectAll = false;
-                                    $boxA.checked =false;
-                                }
-                        }   
-                    })     
+                }
+                if(postion === 'lower'){
+                        if($boxB.checked === true){
+                            this.selected = $.extend(true, [], this.carts);//采用深度复制，而不是双向绑定
+                            this.selectAll = true;
+                            $boxA.checked = true;
+                        }else{
+                            this.selected = [];
+                            this.selectAll = false;
+                            $boxA.checked =false;
+                        }
+                }
+                    
            }
         },
         computed: {
