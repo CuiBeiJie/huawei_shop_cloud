@@ -19,6 +19,7 @@
         <module>huawei-user</module>
         <module>huawei-auth-center</module>
         <module>huawei-cart</module>
+        <module>huawei-order</module>
     </modules>
     <packaging>pom</packaging>
 

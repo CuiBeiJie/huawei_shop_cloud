@@ -16,7 +16,7 @@ import java.util.Date;
 public class Shipping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id; //物流地址id
+    private Integer id; //物流地址id
     private Long userId; //用户id
     private String name; //用户名称
     private String state; //省份
@@ -29,4 +29,5 @@ public class Shipping {
     private String addressAlias; //地址别名
     private Date createTime; //创建时间
     private Date updateTime; //修改时间
+    private Boolean isdefault;//是否为默认收货地址
 }

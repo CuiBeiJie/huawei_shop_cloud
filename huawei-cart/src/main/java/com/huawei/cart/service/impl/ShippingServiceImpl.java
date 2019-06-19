@@ -11,8 +11,10 @@ import com.huawei.common.exception.SelfException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: cuibeijie
@@ -33,9 +35,24 @@ public class ShippingServiceImpl implements ShippingService {
         shipping.setUserId(loginUser.getId());
         shipping.setCreateTime(new Date());
         shipping.setUpdateTime(new Date());
+        shipping.setIsdefault(false);
         int num = shippingMapper.insert(shipping);
         if(num != 1){
             throw new SelfException(ExceptionEnums.SHIPPING_SAVE_ERROR);
         }
+    }
+
+    @Override
+    public List<Shipping> queryShipLists() {
+        // 获取登录用户
+        UserInfo loginUser = UserInterCeptor.getLoginUser();
+        Shipping record = new Shipping();
+        record.setUserId(loginUser.getId());
+        List<Shipping> shippings = shippingMapper.select(record);
+        if(CollectionUtils.isEmpty(shippings)){
+            throw new SelfException(ExceptionEnums.ADDRESS_NOT_FOUND);
+        }
+        System.out.println("===shipLists======"+shippings);
+        return shippings;
     }
 }

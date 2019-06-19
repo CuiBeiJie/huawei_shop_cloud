@@ -39,7 +39,8 @@ public enum  ExceptionEnums {
     CREATE_TOKEN_ERROR(500,"用户凭证生成失败"),
     UNAUTHORIZED(401,"用户未授权"),
     CART_NOT_FOUND(404,"购物车中商品不存在"),
-    SHIPPING_SAVE_ERROR(500,"新增物流失败")
+    SHIPPING_SAVE_ERROR(500,"新增物流失败"),
+    ADDRESS_NOT_FOUND(404,"物流地址不存在，请去添加送货地址")
     ;
     private Integer code;
     private String msg;
