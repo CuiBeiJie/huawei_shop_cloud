@@ -42,7 +42,7 @@
 							  <div>
 								  <div :class="{con:true,name:true,selected:i === selectedAddress}"><a href="javascript:;" @click.stop="selectedAddress=i" >{{a.name}}<span title="点击取消选择"></span>&nbsp;</a></div>
 								<div class="con address">{{a.state + a.city + a.district + a.address}} <span>{{a.phone}}</span>
-									<span class="base" v-if="a.default">默认地址</span>
+									<span class="base" v-if="a.isdefault">默认地址</span>
 									<span class="edittext"><a data-toggle="modal" data-target=".edit" data-keyboard="false" >编辑</a>&nbsp;&nbsp;<a href="javascript:;">删除</a></span>
 								</div>
 								<div class="clearfix"></div>
@@ -59,36 +59,60 @@
 						        <h4 id="myModalLabel" class="modal-title">添加收货地址</h4>
 						      </div>
 						      <div class="modal-body">
-						      	<form action="" class="sui-form form-horizontal">
+						      	<form action="http://api.huawei.com/api/cart/addShipping" class="sui-form form-horizontal" id="addressForm" method="POST">
 						      		 <div class="control-group">
 									    <label class="control-label">收货人：</label>
 									    <div class="controls">
-									      <input type="text" class="input-medium">
+									      <input type="text" class="input-medium" name="name">
+									    </div>
+									  </div>
+									  <div class="control-group">
+									    <label class="control-label">省份：</label>
+									    <div class="controls">
+									      <input type="text" class="input-medium" name="state">
+									    </div>
+									  </div>
+									  <div class="control-group">
+									    <label class="control-label">城市：</label>
+									    <div class="controls">
+									      <input type="text" class="input-medium" name="city">
+									    </div>
+									  </div>
+									  <div class="control-group">
+									    <label class="control-label">区：</label>
+									    <div class="controls">
+									      <input type="text" class="input-medium" name="district">
+									    </div>
+									  </div>
+									  <div class="control-group">
+									    <label class="control-label">街道：</label>
+									    <div class="controls">
+									      <input type="text" class="input-medium" name="address">
 									    </div>
 									  </div>
 									   
 									   <div class="control-group">
 									    <label class="control-label">详细地址：</label>
 									    <div class="controls">
-									      <input type="text" class="input-large">
+									      <input type="text" class="input-large" name="addressDetail">
 									    </div>
 									  </div>
 									   <div class="control-group">
 									    <label class="control-label">联系电话：</label>
 									    <div class="controls">
-									      <input type="text" class="input-medium">
+									      <input type="text" class="input-medium" name="phone">
 									    </div>
 									  </div>
 									   <div class="control-group">
-									    <label class="control-label">邮箱：</label>
+									    <label class="control-label">邮编：</label>
 									    <div class="controls">
-									      <input type="text" class="input-medium">
+									      <input type="text" class="input-medium" name="zipcode">
 									    </div>
 									  </div>
 									   <div class="control-group">
 									    <label class="control-label">地址别名：</label>
 									    <div class="controls">
-									      <input type="text" class="input-medium">
+									      <input type="text" class="input-medium" name="addressAlias">
 									    </div>
 									    <div class="othername">
 									    	建议填写常用地址：<a href="#" class="sui-btn btn-default">家里</a>　<a href="#" class="sui-btn btn-default">父母家</a>　<a href="#" class="sui-btn btn-default">公司</a>
@@ -97,7 +121,7 @@
 						      	</form>
 						      </div>
 						      <div class="modal-footer">
-						        <button type="button" data-ok="modal" class="sui-btn btn-primary btn-large">确定</button>
+						        <button type="button" data-ok="modal" class="sui-btn btn-primary btn-large" @click="submitForm()">确定</button>
 						        <button type="button" data-dismiss="modal" class="sui-btn btn-default btn-large">取消</button>
 						      </div>
 						    </div>
@@ -116,8 +140,8 @@
 					</div>
 					<div class="step-cont">
 						<ul class="payType">
-							<li class="" >微信付款<span title="点击取消选择"></span></li>
-							<li class="selected">货到付款<span title="点击取消选择"></span></li>
+							<li :class="{selected:order.paymentType === 1}" @click="order.paymentType=1">微信付款<span title="点击取消选择"></span></li>
+							<li :class="{selected:order.paymentType === 2}" @click="order.paymentType=2">货到付款<span title="点击取消选择"></span></li>
 						</ul>
 					</div>
 					<div class="hr"></div>
@@ -128,19 +152,21 @@
 						<ul class="send-detail">
 							<li >
 								<div class="sendGoods">
-									<ul class="yui3-g">
+									<ul class="yui3-g" v-for="(c,i) in carts" :key="i">
 										<li class="yui3-u-1-6">
-											<span><img width="70px" height="70px" src="img/goods.png"/></span>
+											<span><img width="70px" height="70px" :src="c.image"/></span>
 										</li>
 										<li class="yui3-u-7-12">
-											<div class="desc">macbook air 2017新款，带bar 顺畅装逼体验</div>
-											<div class="seven">7天无理由退货</div>
+											<div class="desc">{{c.title}}</div>
+											<div class="seven">
+												<span v-for="(v,k) in JSON.parse(c.ownSpec)">{{k + ':' + v}} </span>
+											</div>
 										</li>
 										<li class="yui3-u-1-12">
-											<div class="price">￥8848.00</div>
+											<div class="price">￥{{ly.formatPrice(c.price * c.num)}}</div>
 										</li>
 										<li class="yui3-u-1-12">
-											<div class="num">X1</div>
+											<div class="num">X{{c.num}}</div>
 										</li>
 										<li class="yui3-u-1-12">
 											<div class="exit">有货</div>
@@ -173,27 +199,27 @@
 			<div class="static fr">
 				<div class="list">
 					<span><i class="number">1</i>件商品，总商品金额</span>
-					<em class="allprice">¥8848.00</em>
+					<em class="allprice">¥{{ly.formatPrice(totalPay)}}</em>
 				</div>
 				<div class="list">
 					<span>返现：</span>
-					<em class="money">0.00</em>
+					<em class="money">{{ly.formatPrice(order.discount)}}</em>
 				</div>
 				<div class="list">
 					<span>运费：</span>
-					<em class="transport">0.00</em>
+					<em class="transport">{{ly.formatPrice(order.postFee)}}</em>
 				</div>
 			</div>
 		</div>
 		<div class="clearfix trade">
-			<div class="fc-price">应付金额:　<span class="price">¥8848</span></div>
+			<div class="fc-price">应付金额:　<span class="price">¥{{ly.formatPrice(actualPay)}}</span></div>
 			<div class="fc-receiverInfo">
 				寄送至:{{addresses[selectedAddress].address}}
 				收货人：{{addresses[selectedAddress].name}} {{addresses[selectedAddress].phone}}
 			</div>
 		</div>
 		<div class="submit">
-			<a class="sui-btn btn-danger btn-xlarge" href="pay.html">提交订单</a>
+			<a class="sui-btn btn-danger btn-xlarge" href="#" @click.prevent="submit">提交订单</a>
 		</div>
 	</div>
 
@@ -205,16 +231,17 @@
         var orderInfoVm = new Vue({
             el:"#orderInfoApp",
             data:{
+				ly,
                 addresses:[// 可选地址列表,假数据，需要从后台查询
 					{
-					    name:"虎哥",// 收件人姓名
-						phone:"15800000000",// 电话
-						state:"上海",// 省份
-						city:"上海",// 城市
-						district:"浦东新区",// 区
-						address:"航头镇航头路18号传智播客 3号楼",// 街道地址
-						zipCode:"210000", // 邮编
-						default: true
+					    name:"杰哥",// 收件人姓名
+						phone:"13951727494",// 电话
+						state:"江苏省",// 省份
+						city:"南京市",// 城市
+						district:"江宁区",// 区
+						address:"东山街道，骆村新寓，A13",// 街道地址
+						zipCode:"243000", // 邮编
+						isdefault: true
 					},
                     {
                         name:"张三",// 收件人姓名
@@ -222,14 +249,69 @@
                         state:"北京",// 省份
                         city:"北京",// 城市
                         district:"朝阳区",// 区
-                        address:"天堂路 3号楼",// 街道地址
+                        address:"南京路 3号楼",// 街道地址
                         zipCode:"100000", // 邮编
-                        default: false
+                        isdefault: false
                     }
 				],
-				selectedAddress: 0,
-
-            },
+				selectedAddress: 0, //默认选择的地址
+				order: {
+					paymentType: 1, //付款方式，默认为1，即微信支付
+					postFee: 0, //邮费
+					discount: 0, //优惠
+				},
+                carts: [], //要下单的购物车数据
+			},
+			created() {
+				this.loadUser().then(() =>{
+					//已登录
+					//获取要下单的购物车数据
+                    this.carts = ly.store.get("selectedCarts") || [];
+					//查询物流地址
+					ly.http.get("/cart/queryShipLists").then(({ data }) => {
+                          this.addresses = data || [];
+                    }).catch(() => {
+						alert("请添加送货地址");
+					})
+				}).catch(() =>{
+					//未登录
+					//重定向到登录页
+					window.location.href = "/login.html?returnUrl=" + window.location.href;
+				})
+			},
+			methods: {
+				loadUser(){
+					return ly.http.get("/auth/verify");
+				},
+				submitForm(){
+					this.loadUser().then(() =>{
+					//已登录
+					//提交表单
+					$("#addressForm").submit();
+					}).catch(() =>{
+						//未登录
+						//重定向到登录页
+						window.location.href = "/login.html?returnUrl=" + window.location.href;
+					})
+				},
+				submit(){
+					//对carts进行处理
+					const carts = this.carts.map(({skuId,num}) =>({skuId,num}));
+					const order = {
+						paymentType: this.paymentType,
+						carts: carts,
+						addressId: this.addresses[this.selectedAddress]
+					}
+				}
+			},
+			computed: {
+				totalPay() {// 总金额
+					return this.carts.map(c => c.num * c.price).reduce((p1, p2) => p1 + p2, 0);
+				},
+				actualPay(){// 实际付款
+					return this.totalPay - this.order.postFee - this.order.discount;
+				}
+			},
 			components:{
                 shortcut: () => import("/js/pages/shortcut.js")
 			}

@@ -52,7 +52,7 @@ const shortcut = {
     },
     methods: {
         gotoLogin() {
-            window.location = "/login.html?returnUrl=" + window.location;
+            window.location.href = "/login.html?returnUrl=" + window.location.href;
         }
     }
 }
