@@ -295,13 +295,32 @@
 					})
 				},
 				submit(){
-					//对carts进行处理
-					const carts = this.carts.map(({skuId,num}) =>({skuId,num}));
-					const order = {
-						paymentType: this.paymentType,
-						carts: carts,
-						addressId: this.addresses[this.selectedAddress]
-					}
+					this.loadUser().then(() => {
+						//已登录
+						//对carts进行处理
+						const carts = this.carts.map(({skuId,num}) =>({skuId,num}));
+						const order = {
+							paymentType: this.order.paymentType,
+							carts: carts,
+							addressId: this.addresses[this.selectedAddress].id
+						};
+						ly.http.post("/order/createOrder",order,{
+							transformResponse: [ function (data) {
+                                  return data;
+							}]
+						}).then( resp => {
+							//订单创建成功，删除所选额selectCarts
+							ly.store.del("selectedCarts");
+							//跳转到付款页,并传递订单id
+							window.location.href = "/pay.html?id=" + resp.data;
+						})
+
+					}).catch(() =>{
+						//未登录
+						//重定向到登录页
+						window.location.href = "/login.html?returnUrl=" + window.location.href;
+					})
+					
 				}
 			},
 			computed: {
