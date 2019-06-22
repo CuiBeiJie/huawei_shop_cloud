@@ -40,7 +40,11 @@ public enum  ExceptionEnums {
     UNAUTHORIZED(401,"用户未授权"),
     CART_NOT_FOUND(404,"购物车中商品不存在"),
     SHIPPING_SAVE_ERROR(500,"新增物流失败"),
-    ADDRESS_NOT_FOUND(404,"物流地址不存在，请去添加送货地址")
+    ADDRESS_NOT_FOUND(404,"物流地址不存在，请去添加送货地址"),
+    CREATE_ORDER_FAIL(500,"创建订单失败"),
+    CREATE_ORDERDETAIL_FAIL(500,"创建订单详情失败"),
+    STOCK_NOT_ENOUGH(500,"商品库存不足"),
+    ORDER_NOT_FOUND(404,"该订单不存在")
     ;
     private Integer code;
     private String msg;

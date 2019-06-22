@@ -15,4 +15,6 @@ public interface ShippingService {
     void addShipping(Shipping shipping);
     //查询物流列表
     List<Shipping> queryShipLists();
+    //根据id查询物流
+    Shipping queryShippingById(Integer id);
 }

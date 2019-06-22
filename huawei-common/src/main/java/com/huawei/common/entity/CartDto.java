@@ -1,4 +1,4 @@
-package com.huawei.order.dto;
+package com.huawei.common.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

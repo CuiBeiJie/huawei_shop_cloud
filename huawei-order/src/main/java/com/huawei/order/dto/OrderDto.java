@@ -1,4 +1,5 @@
 package com.huawei.order.dto;
+import com.huawei.common.entity.CartDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

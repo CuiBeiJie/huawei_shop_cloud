@@ -1,13 +1,12 @@
 package com.huawei.item.api;
 
+import com.huawei.common.entity.CartDto;
 import com.huawei.common.vo.PageResult;
 import com.huawei.item.param.SpuParam;
 import com.huawei.item.pojo.Sku;
 import com.huawei.item.pojo.SpuDetail;
 import com.huawei.item.vo.SpuVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,4 +53,21 @@ public interface GoodsApi {
      */
     @GetMapping("spu/{id}")
     SpuParam querySpuById(@PathVariable("id") Long id);
+
+    /**
+     * 根据sku ids查询sku
+     * @param ids
+     * @return
+     */
+    @GetMapping("sku/list/ids")
+    List<Sku> querySkusByIds(@RequestParam("ids") List<Long> ids);
+
+    /**
+     * 减库存
+     * @param cartDtos
+     * @return
+     */
+    @PostMapping("/stock/decrease")
+    Void decreaseStock(@RequestBody List<CartDto> cartDtos);
+
 }

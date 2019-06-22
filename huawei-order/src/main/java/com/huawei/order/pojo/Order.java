@@ -35,7 +35,7 @@ public class Order {
     private String receiverAddress; // 收货地址，如：xx路xx号
     private String receiverZip; // 邮政编码,如：310001
     private Integer invoiceType = 0;// 发票类型，0无发票，1普通发票，2电子发票，3增值税发票
-    private Integer sourceType = 1;// 订单来源 1:app端，2：pc端，3：M端，4：微信端，5：手机qq端
+    private Integer sourceType = 2;// 订单来源 1:app端，2：pc端，3：M端，4：微信端，5：手机qq端
 
     @Transient
     private OrderStatus orderStatus;

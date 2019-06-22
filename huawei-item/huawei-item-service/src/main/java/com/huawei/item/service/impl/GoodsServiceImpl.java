@@ -2,6 +2,7 @@ package com.huawei.item.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.huawei.common.entity.CartDto;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.common.vo.PageResult;
@@ -263,6 +264,20 @@ public class GoodsServiceImpl implements GoodsSerivce {
         }
         fillStock(skus,ids);
         return skus;
+    }
+
+    /**
+     * 减库存
+     * @param cartDtos
+     */
+    @Transactional
+    public void decreaseStock(List<CartDto> cartDtos) {
+        for (CartDto cartDto : cartDtos) {
+            int count = stockMapper.decreaseStock(cartDto.getSkuId(), cartDto.getNum());
+            if (count != 1) {
+                throw new SelfException(ExceptionEnums.STOCK_NOT_ENOUGH);
+            }
+        }
     }
 
     /**

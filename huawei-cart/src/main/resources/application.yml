@@ -5,6 +5,11 @@ spring:
     name: cart-service
   redis:
     host: 192.168.75.129
+  rabbitmq:
+    host: 192.168.154.1
+    username: huawei
+    password: huawei
+    virtual-host: /huawei-shop
   datasource:
     url: jdbc:mysql://192.168.75.131:3306/huawei_shop?characterEncoding=UTF-8&useSSL=false
     username: root

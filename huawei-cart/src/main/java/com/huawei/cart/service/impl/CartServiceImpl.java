@@ -2,7 +2,7 @@ package com.huawei.cart.service.impl;
 import com.huawei.auth.entity.UserInfo;
 import com.huawei.cart.interceptor.UserInterCeptor;
 import com.huawei.cart.pojo.Cart;
-import com.huawei.cart.service.CartSevice;
+import com.huawei.cart.service.CartService;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.common.utils.JsonUtils;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @Description: 购物车接口实现层
  */
 @Service
-public class CartServiceImpl implements CartSevice {
+public class CartServiceImpl implements CartService {
     private static final String KEY_PREFIX = "huawei:cart:uid:";
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -124,6 +124,19 @@ public class CartServiceImpl implements CartSevice {
         BoundHashOperations<String, Object, Object> hashOps = this.redisTemplate.boundHashOps(key);
         for (Long skuId: skuIds) {
             hashOps.delete(skuId.toString());
+        }
+    }
+
+    /**
+     * 删除购物车商品
+     * @param ids
+     * @param userId
+     */
+    public void deleteCarts(List<Object> ids, Integer userId) {
+        String key = KEY_PREFIX + userId;
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(key);
+        for (Object id : ids) {
+            hashOps.delete(id.toString());
         }
     }
 }

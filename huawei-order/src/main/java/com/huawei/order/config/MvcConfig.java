@@ -21,4 +21,5 @@ public class MvcConfig implements WebMvcConfigurer {
         //配置登录拦截器
         registry.addInterceptor(new UserInterCeptor(props)).addPathPatterns("/**");
     }
+
 }

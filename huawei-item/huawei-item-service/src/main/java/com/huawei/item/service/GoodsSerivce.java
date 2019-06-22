@@ -1,5 +1,6 @@
 package com.huawei.item.service;
 
+import com.huawei.common.entity.CartDto;
 import com.huawei.common.vo.PageResult;
 import com.huawei.item.param.SpuParam;
 import com.huawei.item.pojo.Sku;
@@ -29,4 +30,6 @@ public interface GoodsSerivce {
     SpuParam querySpuById(Long id);
     //根据sku ids查询sku
     List<Sku> querySkusByIds(List<Long> ids);
+    //减库存
+    void decreaseStock(List<CartDto> cartDtos);
 }

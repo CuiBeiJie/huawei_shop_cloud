@@ -33,7 +33,11 @@ public class UserInterCeptor implements HandlerInterceptor {
     //前置拦截
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //获取cookie中的tooken
-        String token = CookieUtils.getCookieValue(request, props.getCookieName());
+        //先从请求头里面取(Feign客户端发起的)
+        String token = request.getHeader(props.getCookieName());
+        if(token == null){
+            token =  CookieUtils.getCookieValue(request, props.getCookieName());
+        }
         if (StringUtils.isBlank(token)) {
             //用户未登录,返回401，拦截
             response.setStatus(HttpStatus.UNAUTHORIZED.value());

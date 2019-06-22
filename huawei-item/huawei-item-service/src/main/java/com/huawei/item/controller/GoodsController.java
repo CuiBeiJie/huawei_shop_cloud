@@ -1,5 +1,6 @@
 package com.huawei.item.controller;
 
+import com.huawei.common.entity.CartDto;
 import com.huawei.common.vo.PageResult;
 import com.huawei.item.param.SpuParam;
 import com.huawei.item.pojo.Sku;
@@ -122,5 +123,16 @@ public class GoodsController {
     @GetMapping("spu/{id}")
     ResponseEntity<SpuParam> querySpuById(@PathVariable("id") Long id){
        return ResponseEntity.ok(goodsService.querySpuById(id));
+    }
+
+    /**
+     * 减库存
+     * @param cartDtos
+     * @return
+     */
+    @PostMapping("/stock/decrease")
+    public ResponseEntity<Void> decreaseStock(@RequestBody List<CartDto> cartDtos){
+         goodsService.decreaseStock(cartDtos);
+         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

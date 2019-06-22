@@ -52,7 +52,19 @@ public class ShippingServiceImpl implements ShippingService {
         if(CollectionUtils.isEmpty(shippings)){
             throw new SelfException(ExceptionEnums.ADDRESS_NOT_FOUND);
         }
-        System.out.println("===shipLists======"+shippings);
         return shippings;
+    }
+
+    /**
+     * 根据id查询物流
+     * @param id
+     * @return
+     */
+    public Shipping queryShippingById(Integer id) {
+        Shipping shipping = shippingMapper.selectByPrimaryKey(id);
+        if(shipping == null){
+            throw new SelfException(ExceptionEnums.ADDRESS_NOT_FOUND);
+        }
+        return shipping;
     }
 }

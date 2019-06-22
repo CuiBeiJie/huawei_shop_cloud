@@ -9,7 +9,7 @@ import java.util.List;
  * @Date: 2019/6/16 17:06
  * @Description: 购物车接口层
  */
-public interface CartSevice {
+public interface CartService {
     //添加购物车
     void addCart(Cart cart);
     //查询购物车列表
@@ -20,4 +20,6 @@ public interface CartSevice {
     void deleteCart(String skuId);
     //批量删除购物车中商品
     void batchDeleteCart(List<Long> skuIds);
+    //删除购物车
+    void deleteCarts(List<Object> ids, Integer userId);
 }

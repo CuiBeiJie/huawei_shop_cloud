@@ -1,7 +1,7 @@
 package com.huawei.cart.controller;
 
 import com.huawei.cart.pojo.Cart;
-import com.huawei.cart.service.CartSevice;
+import com.huawei.cart.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 public class CartController {
     @Autowired
-    private CartSevice cartSevice;
+    private CartService cartService;
     /**
      * 新增购物车
      * @param cart
@@ -25,7 +25,7 @@ public class CartController {
      */
     @PostMapping
     public ResponseEntity<Void> addCart(@RequestBody Cart cart){
-        cartSevice.addCart(cart);
+        cartService.addCart(cart);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     /**
@@ -35,7 +35,7 @@ public class CartController {
      */
     @GetMapping
     public ResponseEntity<List<Cart>> queryCartList() {
-        return ResponseEntity.ok(cartSevice.queryCartList());
+        return ResponseEntity.ok(cartService.queryCartList());
     }
 
     /**
@@ -47,7 +47,7 @@ public class CartController {
     @PutMapping
     public ResponseEntity<Void> updateNum(@RequestParam("skuId") Long skuId,
                                           @RequestParam("num") Integer num) {
-        cartSevice.updateNum(skuId, num);
+        cartService.updateNum(skuId, num);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -58,7 +58,7 @@ public class CartController {
      */
     @DeleteMapping("{skuId}")
     public ResponseEntity<Void> deleteCart(@PathVariable("skuId") String skuId) {
-        cartSevice.deleteCart(skuId);
+        cartService.deleteCart(skuId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -69,7 +69,7 @@ public class CartController {
      */
     @DeleteMapping("/batchDeleteCart")
     public ResponseEntity<Void> batchDeleteCart(@RequestParam("ids") List<Long> skuIds){
-        cartSevice.batchDeleteCart(skuIds);
+        cartService.batchDeleteCart(skuIds);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

@@ -12,5 +12,5 @@ import tk.mybatis.mapper.common.Mapper;
  * @create: 2019-05-12 23:07
  */
 @RegisterMapper
-public interface BaseMapper<T> extends Mapper<T>, IdListMapper<T,Long>, InsertListMapper<T> {
+public interface BaseMapper<T,PK> extends Mapper<T>, IdListMapper<T,PK>, InsertListMapper<T> {
 }

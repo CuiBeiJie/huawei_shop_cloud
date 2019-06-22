@@ -1,4 +1,4 @@
-package com.huawei.order.dto;
+package com.huawei.order.enums;
 
 /**
  * @author bystander

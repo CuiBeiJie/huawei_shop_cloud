@@ -10,6 +10,19 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
   redis:
     host: 192.168.75.129
+  rabbitmq:
+    host: 192.168.154.1
+    username: huawei
+    password: huawei
+    virtual-host: /huawei-shop
+    template:
+      retry:
+        enabled: true
+        initial-interval: 10000ms
+        max-interval: 300000ms
+        multiplier: 2
+      exchange: huawei.cart.exchange
+    publisher-confirms: true
   jackson:
     default-property-inclusion: non_null
 eureka:
@@ -28,4 +41,8 @@ huawei:
   jwt:
     pubKeyPath: D:/localFile/rsa.pub # 公钥地址
     cookieName: HUAWEI_SHOP_TOKEN #cookie名称
+  worker:
+    workerId: 1
+    datacenterId: 1
+
 

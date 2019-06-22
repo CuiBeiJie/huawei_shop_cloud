@@ -13,7 +13,6 @@ import tk.mybatis.spring.annotation.MapperScan;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
 @MapperScan("com.huawei.cart.mapper")
 public class CartApplication {
     public static void main(String[] args) {

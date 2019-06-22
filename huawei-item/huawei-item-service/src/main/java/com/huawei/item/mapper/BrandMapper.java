@@ -15,7 +15,7 @@ import java.util.List;
  * @Date: 2019/5/3 19:57
  * @Description:分类管理数据库层
  */
-public interface BrandMapper extends BaseMapper<Brand> {
+public interface BrandMapper extends BaseMapper<Brand,Long> {
     /**
      * 新增商品分类和品牌中间表数据
      * @param cid 商品分类id

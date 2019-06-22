@@ -10,5 +10,5 @@ import tk.mybatis.mapper.common.Mapper;
  * @author: cuibeijie
  * @create: 2019-05-12 22:54
  */
-public interface SkuMapper extends BaseMapper<Sku> {
+public interface SkuMapper extends BaseMapper<Sku,Long> {
 }
