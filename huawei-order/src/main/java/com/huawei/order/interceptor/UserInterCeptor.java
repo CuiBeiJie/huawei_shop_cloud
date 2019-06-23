@@ -34,6 +34,8 @@ public class UserInterCeptor implements HandlerInterceptor {
     private static final ThreadLocal<UserInfo> t1 = new ThreadLocal<>();
     //前置拦截
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+       String url = request.getRequestURI();
+       System.out.println("====requesturl =====" + url);
         //获取cookie中的tooken
         String token = CookieUtils.getCookieValue(request, props.getCookieName());
         if (StringUtils.isBlank(token)) {

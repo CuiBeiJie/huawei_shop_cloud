@@ -44,7 +44,11 @@ public enum  ExceptionEnums {
     CREATE_ORDER_FAIL(500,"创建订单失败"),
     CREATE_ORDERDETAIL_FAIL(500,"创建订单详情失败"),
     STOCK_NOT_ENOUGH(500,"商品库存不足"),
-    ORDER_NOT_FOUND(404,"该订单不存在")
+    ORDER_NOT_FOUND(404,"该订单不存在"),
+    WX_PAY_SIGN_INVALID(400, "微信支付签名异常"),
+    ORDER_STATUS_EXCEPTION(400,"该订单异常不能生成微信支付链接"),
+    WX_PAY_NOTIFY_PARAM_ERROR(400,"微信支付回调数据不正确"),
+    UPDATE_ORDERSTATUS_FAIL(500,"更新订单状态失败")
     ;
     private Integer code;
     private String msg;

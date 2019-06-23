@@ -3,6 +3,7 @@ import com.huawei.order.dto.OrderDto;
 import com.huawei.order.pojo.Order;
 import com.huawei.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import javax.validation.Valid;
  * @Description: 订单逻辑控制层
  */
 @RestController
+@RequestMapping("order")
 public class OrderController {
     @Autowired
     private OrderService orderService;
@@ -37,5 +39,16 @@ public class OrderController {
     @GetMapping("{id}")
     public ResponseEntity<Order> queryOrderById(@PathVariable("id") Long orderId) {
         return ResponseEntity.ok(orderService.queryById(orderId));
+    }
+
+    /**
+     * 生成微信支付链接
+     *
+     * @param orderId
+     * @return
+     */
+    @GetMapping("url/{id}")
+    public ResponseEntity<String> createPayUrl(@PathVariable("id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.createPayUrl(orderId));
     }
 }

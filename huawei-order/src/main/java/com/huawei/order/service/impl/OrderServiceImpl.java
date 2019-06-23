@@ -19,6 +19,7 @@ import com.huawei.order.pojo.OrderDetail;
 import com.huawei.order.pojo.OrderStatus;
 import com.huawei.common.entity.Shipping;
 import com.huawei.order.service.OrderService;
+import com.huawei.order.utils.PayHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -52,6 +53,8 @@ public class OrderServiceImpl implements OrderService {
     private GoodsClient goodsClient;//商品
     @Autowired
     private AmqpTemplate amqpTemplate;
+    @Autowired
+    private PayHelper payHelper;
 
     /**
      * 创建订单
@@ -173,5 +176,68 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setOrderStatus(orderStatus);
         return order;
+    }
+
+    /**
+     * 生成微信支付链接
+     * @param orderId
+     * @return
+     */
+    public String createPayUrl(Long orderId) {
+        //先查询订单
+        Order order = queryById(orderId);
+        Integer status = order.getOrderStatus().getStatus();
+        //判断订单订单是否为未支付状态
+        if(OrderStatusEnum.UN_PAY.value() != status){
+            throw new SelfException(ExceptionEnums.ORDER_STATUS_EXCEPTION);
+        }
+        String desc = order.getOrderDetails().get(0).getTitle();
+        Long actualPay = /*order.getActualPay()*/ 1L;//实际为order.getActualPay(),测试的时候改为1分钱
+        return payHelper.createPayUrl(orderId,desc,actualPay);
+    }
+
+    /**
+     * 校验微信回调结果
+     * @param msg
+     */
+    public void handleNotify(Map<String, String> msg) {
+        //校验通信和业务标识
+        payHelper.isSuccess(msg);
+        //校验签名
+        payHelper.isSignatureValid(msg);
+        //校验金额
+        String totalFee = msg.get("total_fee");  //订单金额
+        String outTradeNo = msg.get("out_trade_no");  //订单编号
+        if (StringUtils.isBlank(totalFee) || StringUtils.isBlank(outTradeNo)) {
+            log.error("【微信支付回调】支付回调返回数据不正确");
+            throw new SelfException(ExceptionEnums.WX_PAY_NOTIFY_PARAM_ERROR);
+        }
+        //查询订单
+        Order order = orderMapper.selectByPrimaryKey(Long.valueOf(outTradeNo));
+
+        //todo 这里验证回调数据时，支付金额使用1分进行验证，后续使用实际支付金额验证
+        if (/*order.getActualPay()*/1 != Long.valueOf(totalFee)) {
+            log.error("【微信支付回调】支付回调返回数据不正确");
+            throw new SelfException(ExceptionEnums.WX_PAY_NOTIFY_PARAM_ERROR);
+        }
+
+        //判断支付状态
+        OrderStatus orderStatus = orderStatusMapper.selectByPrimaryKey(Long.valueOf(outTradeNo));
+
+        if (orderStatus.getStatus() != OrderStatusEnum.UN_PAY.value()) {
+            //支付成功
+            return;
+        }
+
+        //修改订单状态
+        OrderStatus status = new OrderStatus();
+        status.setStatus(OrderStatusEnum.PAY_UP.value());
+        status.setOrderId(order.getOrderId());
+        status.setPaymentTime(new Date());
+        int count = orderStatusMapper.updateByPrimaryKeySelective(status);
+        if(count !=1 ){
+            throw new SelfException(ExceptionEnums.UPDATE_ORDERSTATUS_FAIL);
+        }
+        log.info("[订单回调] 订单支付成功！ 订单编号：{}",outTradeNo);
     }
 }

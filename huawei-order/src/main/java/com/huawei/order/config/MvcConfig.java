@@ -19,7 +19,8 @@ public class MvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //配置登录拦截器
-        registry.addInterceptor(new UserInterCeptor(props)).addPathPatterns("/**");
+        //拦截器如果要配拦截路径一定要匹配经过网关之后到达controller层的request.getRequestURI()，这样才能生效
+        registry.addInterceptor(new UserInterCeptor(props)).addPathPatterns("/order/**");
     }
 
 }

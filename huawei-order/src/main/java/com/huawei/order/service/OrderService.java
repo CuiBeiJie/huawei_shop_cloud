@@ -3,6 +3,8 @@ package com.huawei.order.service;
 import com.huawei.order.dto.OrderDto;
 import com.huawei.order.pojo.Order;
 
+import java.util.Map;
+
 /**
  * @Auther: cuibeijie
  * @Date: 2019/6/21 21:40
@@ -13,4 +15,8 @@ public interface OrderService {
     Long createOrder(OrderDto orderDto);
     //根据订单id查询订单详情
     Order queryById(Long orderId);
+    //生成微信支付链接
+    String createPayUrl(Long orderId);
+    //校验回调结果
+    void handleNotify(Map<String, String> msg);
 }
