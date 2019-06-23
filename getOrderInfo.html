@@ -304,7 +304,7 @@
 							carts: carts,
 							addressId: this.addresses[this.selectedAddress].id
 						};
-						ly.http.post("/order/createOrder",order,{
+						ly.http.post("/order-service/order/createOrder",order,{
 							transformResponse: [ function (data) {
                                   return data;
 							}]

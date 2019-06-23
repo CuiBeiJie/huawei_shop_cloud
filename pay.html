@@ -41,9 +41,9 @@
 					<div class="checkout-steps">
 						<div class="fl weixin">微信支付</div>
 						<div class="fl sao"> 
-							<p class="red">二维码已过期，刷新页面重新获取二维码。</p>                      
+							<p class="red">二维码如果已过期，请刷新页面重新获取二维码。</p>                      
 							<div class="fl code">
-								<img src="img/erweima.png" alt="">
+								<div id="qrImage"></div>
 								<div class="saosao">
 									<p>请使用微信扫一扫</p>
 									<p>扫描二维码支付</p>
@@ -85,8 +85,8 @@
 				ly.http.get("/auth/verify").then(() => {
 					// 获取订单id
 					const id = ly.getUrlParam("id");
-					//查询付款金额
-					ly.http.get("/order/" + id).then( resp => {
+					//查询订单信息
+					ly.http.get("/order-service/order/" + id).then( resp => {
 						this.order = resp.data;
 						this.order.orderId = id;
 						//判断订单状态
@@ -94,6 +94,18 @@
                             alert("订单已支付! ");
 							location.href = "/paysuccess.html?orderId=" + id;
 						}
+						//生成支付链接
+						ly.http.get("/order-service/order/url/" + this.order.orderId).then( resp => {
+							//生成二维码
+							new QRCode(document.getElementById("qrImage"), {
+								text: resp.data,
+								width: 250,
+								height: 250,
+								colorDark: "#000000",
+								colorLight: "#ffffff",
+								correctLevel: QRCode.CorrectLevel.H
+							});
+						})
 					})
 					
 				}).catch(() => {
