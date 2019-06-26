@@ -106,6 +106,26 @@
 								correctLevel: QRCode.CorrectLevel.H
 							});
 						})
+						//开启定时任务，查询订单状态
+						const taskId = setInterval(() => {
+							ly.http.get("/order-service/order/state/" + id)
+							       .then( resp => {
+									   let i = resp.data;
+									   //付款成功
+									   if(i === 1){
+                                          clearInterval(taskId);
+                                          location.href = "/paysuccess.html?orderId=" + id
+									   }
+									   if(i === 2){
+                                         //付款失败
+										 clearInterval(taskId);
+										 location.href="/payfail.html";
+									   }
+								   }).catch((e) => {
+									   alert("支付状态查询失败，请刷新界面重试. ")
+									   clearInterval(taskId);
+								   })
+						}, 3000);
 					})
 					
 				}).catch(() => {
