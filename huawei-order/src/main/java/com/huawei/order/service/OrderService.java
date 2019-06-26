@@ -1,6 +1,7 @@
 package com.huawei.order.service;
 
 import com.huawei.order.dto.OrderDto;
+import com.huawei.order.enums.PayStateEnum;
 import com.huawei.order.pojo.Order;
 
 import java.util.Map;
@@ -19,4 +20,6 @@ public interface OrderService {
     String createPayUrl(Long orderId);
     //校验回调结果
     void handleNotify(Map<String, String> msg);
+    //查询订单状态
+    PayStateEnum queryOrderStatus(Long orderId);
 }

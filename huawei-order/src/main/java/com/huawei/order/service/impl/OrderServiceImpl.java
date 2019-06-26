@@ -10,6 +10,7 @@ import com.huawei.order.client.GoodsClient;
 import com.huawei.order.client.ShippingClient;
 import com.huawei.order.dto.OrderDto;
 import com.huawei.order.enums.OrderStatusEnum;
+import com.huawei.order.enums.PayStateEnum;
 import com.huawei.order.interceptor.UserInterCeptor;
 import com.huawei.order.mapper.OrderDetailMapper;
 import com.huawei.order.mapper.OrderMapper;
@@ -239,5 +240,22 @@ public class OrderServiceImpl implements OrderService {
             throw new SelfException(ExceptionEnums.UPDATE_ORDERSTATUS_FAIL);
         }
         log.info("[订单回调] 订单支付成功！ 订单编号：{}",outTradeNo);
+    }
+
+    /**
+     * 订单状态查询
+     * @param orderId
+     * @return
+     */
+    public PayStateEnum queryOrderStatus(Long orderId) {
+        //查询订单状态
+        OrderStatus orderStatus = orderStatusMapper.selectByPrimaryKey(orderId);
+        //判断支付状态
+        if(orderStatus.getStatus() != OrderStatusEnum.UN_PAY.value()){
+            //支付成功一定是支付成功
+            return PayStateEnum.SUCCESS;
+        }
+        //如果是未支付，不一定是没有支付，一定要去微信查询支付状态
+        return payHelper.queryPayStatus(orderId);
     }
 }

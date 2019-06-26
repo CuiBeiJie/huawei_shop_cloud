@@ -51,4 +51,8 @@ public class OrderController {
     public ResponseEntity<String> createPayUrl(@PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.createPayUrl(orderId));
     }
+    @GetMapping("state/{id}")
+    public ResponseEntity<Integer> queryOrderState(@PathVariable("id") Long orderId){
+        return ResponseEntity.ok(orderService.queryOrderStatus(orderId).getValue());
+    }
 }

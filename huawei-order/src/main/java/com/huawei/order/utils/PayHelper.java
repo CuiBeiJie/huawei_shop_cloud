@@ -5,10 +5,19 @@ import com.github.wxpay.sdk.WXPayUtil;
 import com.huawei.common.enums.ExceptionEnums;
 import com.huawei.common.exception.SelfException;
 import com.huawei.order.config.PayConfig;
+import com.huawei.order.enums.OrderStatusEnum;
+import com.huawei.order.enums.PayStateEnum;
+import com.huawei.order.mapper.OrderMapper;
+import com.huawei.order.mapper.OrderStatusMapper;
+import com.huawei.order.pojo.Order;
+import com.huawei.order.pojo.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +33,10 @@ public class PayHelper {
     private PayConfig payConfig;
     @Autowired
     private WXPay wxPay;
+    @Autowired
+    private OrderMapper orderMapper;
+    @Autowired
+    private OrderStatusMapper orderStatusMapper;
     /**
      * 生成支付二维码
      * @param orderId
@@ -92,6 +105,71 @@ public class PayHelper {
         } catch (Exception e) {
             log.error("【微信支付】检验签名失败，数据：{}", result);
             throw new SelfException(ExceptionEnums.WX_PAY_SIGN_INVALID);
+        }
+    }
+
+    /**
+     * 查询支付状态
+     * @param orderId
+     */
+    public PayStateEnum queryPayStatus(Long orderId) {
+        try {
+            // 组织请求参数
+            Map<String,String> reqData = new HashMap<>();
+            reqData.put("out_trade_no",orderId.toString());
+            // 查询状态
+            Map<String, String> result = wxPay.orderQuery(reqData);
+            //校验状态
+            isSuccess(result);
+            //检验签名
+            isSignatureValid(result);
+            //校验金额
+            String totalFee = result.get("total_fee");  //订单金额
+            String outTradeNo = result.get("out_trade_no");  //订单编号
+            if (StringUtils.isBlank(totalFee) || StringUtils.isBlank(outTradeNo)) {
+                log.error("【微信支付回调】支付回调返回数据不正确");
+                throw new SelfException(ExceptionEnums.WX_PAY_NOTIFY_PARAM_ERROR);
+            }
+            //查询订单
+            Order order = orderMapper.selectByPrimaryKey(Long.valueOf(outTradeNo));
+            //todo 这里验证回调数据时，支付金额使用1分进行验证，后续使用实际支付金额验证
+            if (/*order.getActualPay()*/1 != Long.valueOf(totalFee)) {
+                log.error("【微信支付回调】支付回调返回数据不正确");
+                throw new SelfException(ExceptionEnums.WX_PAY_NOTIFY_PARAM_ERROR);
+            }
+//            SUCCESS—支付成功
+//
+//            REFUND—转入退款
+//
+//            NOTPAY—未支付
+//
+//            CLOSED—已关闭
+//
+//            REVOKED—已撤销（付款码支付）
+//
+//            USERPAYING--用户支付中（付款码支付）
+//
+//            PAYERROR--支付失败(其他原因，如银行返回失败)
+            String state = result.get("trade_state");
+            if(SUCCESS.equals(state)){
+                //支付成功
+                //修改订单状态
+                OrderStatus status = new OrderStatus();
+                status.setStatus(OrderStatusEnum.PAY_UP.value());
+                status.setOrderId(order.getOrderId());
+                status.setPaymentTime(new Date());
+                int count = orderStatusMapper.updateByPrimaryKeySelective(status);
+                if(count != 1 ){
+                    throw new SelfException(ExceptionEnums.UPDATE_ORDERSTATUS_FAIL);
+                }
+                return PayStateEnum.SUCCESS;
+            }
+            if("NOTPAY".equals(state) || "USERPAYING".equals(state)){
+                return PayStateEnum.NOT_PAY;
+            }
+            return PayStateEnum.FAIL;
+        } catch (Exception e) {
+            return PayStateEnum.NOT_PAY;
         }
     }
 }
