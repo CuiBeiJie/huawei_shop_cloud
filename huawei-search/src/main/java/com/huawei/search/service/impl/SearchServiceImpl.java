@@ -254,7 +254,7 @@ public class SearchServiceImpl implements SearchService {
 
     /**
      * 规格参数聚合
-     * @param id
+     * @param cid
      * @param baseQuery
      * @return
      */

@@ -154,7 +154,12 @@ public class SpecificationController {
         specificationService.deleteSpecParam(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-    // 查询规格参数组，及组内参数
+
+    /**
+     * 查询规格参数组，及组内参数
+     * @param cid
+     * @return
+     */
     @GetMapping("group")
     ResponseEntity<List<SpecGroup>> querySpecsByCid(@RequestParam("cid") Long cid){
         return ResponseEntity.ok(specificationService.querySepcListBycid(cid));
