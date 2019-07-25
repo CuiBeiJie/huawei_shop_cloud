@@ -1,10 +1,4 @@
 package com.huawei.gateway.filter;
-/**
- * @Auther: 25349
- * @Date: 2019/6/12 23:53
- * @Description: 登录授权过滤器
- */
-
 import com.huawei.auth.utils.JwtUtils;
 import com.huawei.common.utils.CookieUtils;
 import com.huawei.gateway.config.FilterProperties;
