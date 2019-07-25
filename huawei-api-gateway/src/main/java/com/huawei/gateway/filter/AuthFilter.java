@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @Auther: cuibeijie123
+ * @Auther: cuibeijie
  * @Date: 2019/6/12 23:53
  * @Description: 登录授权过滤器
  */
